@@ -62,7 +62,7 @@ module.exports.loop = function () {
      
     //TODO Check for Creeps needing repair.
 
-    roleMaintain.checkRepairs();
+    Game.spawns.Spawn1.checkRepairs();
     roleTower.defendRoom('W5S13');
     
     for (var name in Game.creeps) {
