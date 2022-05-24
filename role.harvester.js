@@ -2,6 +2,11 @@ var roleCommon = require('role.common');
 var roleResources = require('role.resources');
 
 var roleHarvester = {
+    /**
+     * Builds Harvesters
+     * @deprecated - No longer in use.
+     * @param {number} extensions 
+     */
     buildHarvesters: function (extensions) {
         if (roleHarvester.count() < Memory.requiredHarvesters)
         {
@@ -127,7 +132,7 @@ var roleHarvester = {
                 }
                 if (roleHarvester.countA() < Memory.requiredAHarvesters) {
                     Game.creeps[newName].memory.group = 'A';
-                    }
+                }
                 else if (roleHarvester.countB() < Memory.requiredBHarvesters) {
                     Game.creeps[newName].memory.group = 'B';
                 }

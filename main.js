@@ -1,3 +1,5 @@
+const targetRooms = ['W5S12'];
+
 Memory.requiredHarvesters = 9;
 Memory.requiredAHarvesters = 3;
 Memory.requiredBHarvesters = 2;
@@ -8,28 +10,29 @@ Memory.requiredABuilders = 1;
 
 Memory.damageThreshold = 2000;
 
-const targetRooms = ['W5S12'];
-
 var roleArmy = require('role.army');
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleMaintain = require('role.maintain');
 var roleTower = require('role.tower');
+require('prototype.creep');
+require('prototype.spawn');
 
 module.exports.loop = function () {
-    var extensions = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
-        filter: (structure) => {
-            return structure.structureType == STRUCTURE_EXTENSION;
-        }
-    });
-    roleHarvester.buildHarvesters(extensions.length);
-    if (roleHarvester.count() == Memory.requiredHarvesters) {
-        roleUpgrader.buildUpgraders(extensions.length);
+    var extensionsCount = Game.spawns.Spawn1.countExtensions();
+    var harvestersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester').length;
+    if (harvestersCount < Memory.requiredHarvesters) {
+        Game.spawns.Spawn1.spawnNewHarvester(extensionsCount);
+    }
+    
+    //roleHarvester.buildHarvesters(extensionsCount);
+    /**if (roleHarvester.count() == Memory.requiredHarvesters) {
+        roleUpgrader.buildUpgraders(extensionsCount);
         for (var i in targetRooms) {
-            roleArmy.buildArmy(targetRooms[i], extensions);
+            roleArmy.buildArmy(targetRooms[i], extensionsCount);
         }
-        roleBuilder.buildBuilders(extensions.length);
+        roleBuilder.buildBuilders(extensionsCount);
     }
     /**if (roleHarvester.count() == Memory.requiredHarvesters) {
         
@@ -83,4 +86,11 @@ module.exports.loop = function () {
             delete Memory.creeps[i];
         }
     }
+
+    Creep.prototype.sayHello = function() { 
+        // In prototype functions, 'this' usually has the value of the object calling 
+        // the function. In this case that is whatever creep you are 
+        // calling '.sayHello()' on.
+        this.say("Hello!"); 
+    };
 }
