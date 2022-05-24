@@ -1,3 +1,4 @@
+const mainRoom = 'W5S13';
 const targetRooms = ['W5S12'];
 
 Memory.requiredHarvesters = 8;
@@ -20,6 +21,7 @@ var roleMaintain = require('role.maintain');
 var roleTower = require('role.tower');
 require('prototype.creep');
 require('prototype.spawn');
+require('prototype.tower');
 
 module.exports.loop = function () {
     var extensionsCount = Game.spawns.Spawn1.countExtensions();
@@ -63,7 +65,9 @@ module.exports.loop = function () {
     //TODO Check for Creeps needing repair.
 
     Game.spawns.Spawn1.checkRepairs();
-    roleTower.defendRoom('W5S13');
+    var mainRoomTowers = Game.rooms[mainRoom].find(FIND_MY_STRUCTURES,
+        {filter: {structureType: STRUCTURE_TOWER}});
+        mainRoomTowers.forEach(tower => tower.defendRoom(mainRoom));
     
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
