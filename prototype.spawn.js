@@ -328,3 +328,69 @@ StructureSpawn.prototype.spawnNewMeleeSoldier = function (extensionCount, target
         }
     }
 };
+
+// ********** Builders **********
+
+StructureSpawn.prototype.spawnNewBuilder = function (extensionCount) {
+    var newName = 'Builder' + Game.time;
+    console.log('Spawning: ' + newName);
+    /**
+     * @type {BodyPartConstant[]}
+     */
+    var parts;
+    if (this.isEnergyFull()) {
+        // 300
+        if (extensionCount == 0) {
+            parts = this.setCreepParts(1,1,0,0,0,0,0,2);
+        };
+        // 350
+        if (extensionCount == 1) {
+            parts = this.setCreepParts(1,2,0,0,0,0,0,2);
+        };
+        // 400
+        if (extensionCount == 2 || extensionCount == 3) {
+            parts = this.setCreepParts(2,2,0,0,0,0,0,2);
+        };
+        // 500
+        if (extensionCount == 4 || extensionCount == 5) {
+            parts = this.setCreepParts(2,3,0,0,0,0,0,3);
+        };
+        // 600
+        if (extensionCount == 6 || extensionCount == 7) {
+            parts = this.setCreepParts(3,3,0,0,0,0,0,3);
+        };
+        // 700
+        if (extensionCount == 8 || extensionCount == 9) {
+            parts = this.setCreepParts(3,4,0,0,0,0,0,4);
+        };
+        // 800
+        if (extensionCount == 10 || extensionCount == 11 || extensionCount == 12) {
+            parts = this.setCreepParts(4,4,0,0,0,0,0,4);
+        };
+        // 950
+        if (extensionCount == 13 || extensionCount == 14) {
+            parts = this.setCreepParts(5,4,0,0,0,0,0,5);
+        };
+        // 1050
+        if (extensionCount == 15 || extensionCount == 16) {
+            parts = this.setCreepParts(5,5,0,0,0,0,0,5);
+        };
+        // 1150
+        if (extensionCount == 17) {
+            parts = this.setCreepParts(6,5,0,0,0,0,0,6);
+        };
+        // 1200
+        if (extensionCount == 18 || extensionCount == 19) {
+            parts = this.setCreepParts(6,6,0,0,0,0,0,6);
+        };
+        // 1300
+        if (extensionCount >= 20) {
+            parts = this.setCreepParts(6,7,0,0,0,0,0,7);
+        };
+        if (this.spawnCreep(parts, newName) == OK) {
+            var creep = Game.creeps[newName];
+            creep.memory.role = 'builder';
+            creep.memory.status = 'working';
+        }
+    }
+};

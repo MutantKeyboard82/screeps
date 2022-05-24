@@ -6,7 +6,6 @@ Memory.requiredBHarvesters = 2;
 Memory.requiredUpgraders = 4;
 Memory.requiredMaintainers = 0;
 Memory.requiredBuilders = 1;
-Memory.requiredABuilders = 1;
 Memory.scoutsPerRoom = 1;
 Memory.rangedSoldiersPerRoom = 2;
 Memory.meleeSoldiersPerRoom = 2;
@@ -33,6 +32,8 @@ module.exports.loop = function () {
         if(upgradersCount < Memory.requiredUpgraders) {
             Game.spawns.Spawn1.spawnNewUpgrader(extensionsCount);
         }
+        var constructionSitesMainRoomCount = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES).length;
+        var constructionsSitesExternalCount = 0;
         for (var i in targetRooms) {
             var scoutsCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'scout' &&
                 creep.memory.targetRoom == targetRooms[i]).length;
@@ -40,6 +41,8 @@ module.exports.loop = function () {
                 creep.memory.targetRoom == targetRooms[i]).length;                
             var meleeSoliderCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'meleeSoldier' &&
                 creep.memory.targetRoom == targetRooms[i]).length;
+            constructionsSitesExternalCount = constructionsSitesExternalCount + Game
+                .flags[targetRooms[i]+'Staging'].room.find(FIND_CONSTRUCTION_SITES).length;
             if (scoutsCount < Memory.scoutsPerRoom) {
                 Game.spawns.Spawn1.spawnNewScout(extensionsCount,targetRooms[i]);
             }
@@ -50,17 +53,13 @@ module.exports.loop = function () {
                 Game.spawns.Spawn1.spawnNewMeleeSoldier(extensionsCount,targetRooms[i]);
             }
         }
+        var buildersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder').length;
+        if ((constructionSitesMainRoomCount > 0 || constructionsSitesExternalCount > 0) &&
+            buildersCount < Memory.requiredBuilders) {
+            Game.spawns.Spawn1.spawnNewBuilder(extensionsCount);
+        }
     }
-     /**roleBuilder.buildBuilders(extensionsCount);
-    }
-    /**if (roleHarvester.count() == Memory.requiredHarvesters) {
-        
-    }
-    if (roleHarvester.count() >= Memory.requiredHarvesters) {
-        
-    }**/
-    
-
+     
     //TODO Check for Creeps needing repair.
 
     roleMaintain.checkRepairs();
