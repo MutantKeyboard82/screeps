@@ -1,12 +1,15 @@
 const targetRooms = ['W5S12'];
 
-Memory.requiredHarvesters = 9;
+Memory.requiredHarvesters = 8;
 Memory.requiredAHarvesters = 3;
 Memory.requiredBHarvesters = 2;
-Memory.requiredUpgraders = 3;
+Memory.requiredUpgraders = 4;
 Memory.requiredMaintainers = 0;
 Memory.requiredBuilders = 1;
 Memory.requiredABuilders = 1;
+Memory.scoutsPerRoom = 1;
+Memory.rangedSoldiersPerRoom = 2;
+Memory.meleeSoldiersPerRoom = 2;
 
 Memory.damageThreshold = 2000;
 
@@ -25,14 +28,30 @@ module.exports.loop = function () {
     if (harvestersCount < Memory.requiredHarvesters) {
         Game.spawns.Spawn1.spawnNewHarvester(extensionsCount);
     }
-    
-    //roleHarvester.buildHarvesters(extensionsCount);
-    /**if (roleHarvester.count() == Memory.requiredHarvesters) {
-        roleUpgrader.buildUpgraders(extensionsCount);
-        for (var i in targetRooms) {
-            roleArmy.buildArmy(targetRooms[i], extensionsCount);
+    else {
+        var upgradersCount = _.filter (Game.creeps, (creep) => creep.memory.role == 'upgrader').length;
+        if(upgradersCount < Memory.requiredUpgraders) {
+            Game.spawns.Spawn1.spawnNewUpgrader(extensionsCount);
         }
-        roleBuilder.buildBuilders(extensionsCount);
+        for (var i in targetRooms) {
+            var scoutsCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'scout' &&
+                creep.memory.targetRoom == targetRooms[i]).length;
+            var rangedSoliderCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'rangedSoldier' &&
+                creep.memory.targetRoom == targetRooms[i]).length;                
+            var meleeSoliderCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'meleeSoldier' &&
+                creep.memory.targetRoom == targetRooms[i]).length;
+            if (scoutsCount < Memory.scoutsPerRoom) {
+                Game.spawns.Spawn1.spawnNewScout(extensionsCount,targetRooms[i]);
+            }
+            if (rangedSoliderCount < Memory.rangedSoldiersPerRoom) {
+                Game.spawns.Spawn1.spawnNewRangedSoldier(extensionsCount,targetRooms[i]);
+            }
+            if (meleeSoliderCount < Memory.meleeSoldiersPerRoom) {
+                Game.spawns.Spawn1.spawnNewMeleeSoldier(extensionsCount,targetRooms[i]);
+            }
+        }
+    }
+     /**roleBuilder.buildBuilders(extensionsCount);
     }
     /**if (roleHarvester.count() == Memory.requiredHarvesters) {
         
@@ -41,6 +60,9 @@ module.exports.loop = function () {
         
     }**/
     
+
+    //TODO Check for Creeps needing repair.
+
     roleMaintain.checkRepairs();
     roleTower.defendRoom('W5S13');
     
