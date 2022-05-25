@@ -74,14 +74,8 @@ module.exports.loop = function () {
         if (creep.memory.role == 'harvester') {
             creep.runHarvester();
         }
-        /**if (creep.memory.role == 'harvester' && creep.memory.group != 'C') {
-            roleHarvester.run(creep);
-        }
-        if (creep.memory.role == 'harvester' && creep.memory.group == 'C') {
-            roleHarvester.runC(creep);
-        }**/
         if (creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep);
+            creep.runUpgrader();
         }
         if (creep.memory.role == 'builder') {
             roleBuilder.run(creep);

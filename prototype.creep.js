@@ -18,7 +18,23 @@ Creep.prototype.renew = function() {
     else {
         this.memory.status = 'working';
     }
-}
+};
+
+Creep.prototype.refill = function() {
+    var container = this.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (structure) => {
+            return structure.structureType == STRUCTURE_CONTAINER &&
+                structure.store.getUsedCapacity(RESOURCE_ENERGY) > this.store.getFreeCapacity()
+        }
+    });
+    if (container != null) {
+        this.moveTo(container);
+        this.withdraw(container, RESOURCE_ENERGY);
+    }
+    if (this.store.getFreeCapacity() == 0) {
+        this.memory.status = 'renewing';
+    }
+};
 
 // ********** Harvesters **********
 
@@ -146,5 +162,30 @@ Creep.prototype.depositHarvester = function() {
     }
     if (this.store.getUsedCapacity() == 0) {
         this.memory.status = 'renewing';
+    }
+};
+
+// ********** Upgraders **********
+
+Creep.prototype.runUpgrader = function() {
+    if (this.memory.status == 'working') {
+        this.workUpgrader();
+    }
+    if (this.memory.status == 'renewing') {
+        this.renew();
+    }
+    if (this.memory.status == 'refilling') {
+        this.refill();
+    }
+};
+
+Creep.prototype.workUpgrader = function() {
+    if (this.store[RESOURCE_ENERGY] > 0) {
+        if (this.upgradeController(this.room.controller) == ERR_NOT_IN_RANGE) {
+            this.moveTo(this.room.controller);
+        }
+    }
+    else {
+        this.memory.status = 'refilling';
     }
 };
