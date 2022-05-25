@@ -71,16 +71,11 @@ StructureSpawn.prototype.checkRepairs = function() {
                 structure.hits < Memory.damageThreshold);
         }
     });
-    console.log('Tower targets: ' + targets)
     if (targets.length > 100) {
         Memory.damageThreshold = Memory.damageThreshold - 100;
     }
     if (targets.length == 0) {
         Memory.damageThreshold = Memory.damageThreshold + 1000;
-    }
-    if (targets.length > 0)
-    {
-        console.log('Need repair ' + targets.length);
     }
 }
 

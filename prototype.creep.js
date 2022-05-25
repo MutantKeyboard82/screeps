@@ -31,6 +31,9 @@ Creep.prototype.refill = function() {
         this.moveTo(container);
         this.withdraw(container, RESOURCE_ENERGY);
     }
+    else {
+        this.moveTo(Game.spawns.Spawn1);
+    }
     if (this.store.getFreeCapacity() == 0) {
         this.memory.status = 'renewing';
     }
@@ -100,7 +103,6 @@ Creep.prototype.depositHarvester = function() {
             }
         });
         if(target != null) {
-            console.log(this.name + '' + target);
             if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 this.moveTo(target)
             };
@@ -113,7 +115,6 @@ Creep.prototype.depositHarvester = function() {
                 }
             });
             if(target != null) {
-                console.log(this.name + '' + target);
                 if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     this.moveTo(target)};
             }
@@ -125,7 +126,6 @@ Creep.prototype.depositHarvester = function() {
                     }
                 });
                 if (target != null) {
-                    console.log(this.name + '' + target);
                     if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     this.moveTo(target)};
                 }
@@ -140,7 +140,6 @@ Creep.prototype.depositHarvester = function() {
                 }
         });
         if(target != null) {
-            console.log(this.name + '' + target);
             if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 this.moveTo(target)
             };
@@ -153,7 +152,6 @@ Creep.prototype.depositHarvester = function() {
                     }
             });
             if(target != null) {
-                console.log(this.name + '' + target);
                 if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     this.moveTo(target)
                 };
@@ -187,5 +185,85 @@ Creep.prototype.workUpgrader = function() {
     }
     else {
         this.memory.status = 'refilling';
+    }
+};
+
+// ********** Builders **********
+
+Creep.prototype.runBuilder = function() {
+    if (this.memory.status == 'working') {
+        this.workBuilder();
+    }
+    if (this.memory.status == 'renewing') {
+        this.renew();
+    }
+    if (this.memory.status == 'refilling') {
+        this.refill();
+    }
+};
+
+Creep.prototype.workBuilder = function() {
+    if (this.store[RESOURCE_ENERGY] > 0) {
+        var target = this.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        if (target != null) {
+            if(this.build(target) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target);
+            }
+        }
+        else {
+            if (Memory.constructionSites.length > 0) {
+                this.moveTo(Memory.constructionSites[0]);
+            }
+            else {
+                this.suicide();
+            }
+        }
+    }
+    else {
+        this.memory.status = 'refilling';
+    }
+};
+
+// ********** Army **********
+// ********** Scout **********
+
+Creep.prototype.runScout = function() {
+    if (this.room.name != this.memory.targetRoom) {
+        this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+    }
+    else {
+        this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+    }
+};
+
+Creep.prototype.runRanged = function() {
+    if (this.room.name != this.memory.targetRoom) {
+        this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+    }
+    else {
+        this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+    }
+    var hostiles = this.room.find(FIND_HOSTILE_CREEPS);
+    if(hostiles.length > 0) {
+        var username = hostiles[0].owner.username;
+        Game.notify(`User ${username} spotted in room ${this.room.name}`);
+        this.moveTo(hostiles[0]);
+        this.rangedAttack(hostiles[0]);
+    }
+};
+
+Creep.prototype.runMelee = function() {
+    if (this.room.name != this.memory.targetRoom) {
+        this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+    }
+    else {
+        this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+    }
+    var hostiles = this.room.find(FIND_HOSTILE_CREEPS);
+    if(hostiles.length > 0) {
+        var username = hostiles[0].owner.username;
+        Game.notify(`User ${username} spotted in room ${creep.room.name}`);
+        this.moveTo(hostiles[0]);
+        this.attack(hostiles[0]);
     }
 };

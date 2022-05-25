@@ -75,7 +75,7 @@ var roleArmy = {
 
     runRanged: function(creep) {
         if (creep.room.name != creep.memory.targetRoom) {
-            creep.moveTo(new RoomPosition(23, 48, creep.memory.targetRoom));
+            // creep.moveTo(new RoomPosition(23, 48, creep.memory.targetRoom));
         }
         else {
             creep.moveTo(Game.flags[creep.memory.targetRoom+'Staging']);
@@ -91,7 +91,7 @@ var roleArmy = {
 
     runMelee: function(creep) {
         if (creep.room.name != creep.memory.targetRoom) {
-            creep.moveTo(new RoomPosition(23, 48, creep.memory.targetRoom));
+            // creep.moveTo(new RoomPosition(23, 48, creep.memory.targetRoom));
         }
         else {
             creep.moveTo(Game.flags[creep.memory.targetRoom+'Staging']);

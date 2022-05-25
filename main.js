@@ -1,3 +1,8 @@
+require('prototype.creep');
+require('prototype.spawn');
+require('prototype.tower');
+
+
 const mainRoom = 'W5S13';
 const targetRooms = ['W5S12'];
 
@@ -6,22 +11,11 @@ Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredUpgraders = 1;
 Memory.requiredMaintainers = 0;
-Memory.requiredBuilders = 0;
-Memory.scoutsPerRoom = 1;
-Memory.rangedSoldiersPerRoom = 1;
-Memory.meleeSoldiersPerRoom = 1;
-
+Memory.requiredBuilders = 1;
+Memory.scoutsPerRoom = 0;
+Memory.rangedSoldiersPerRoom = 0;
+Memory.meleeSoldiersPerRoom = 0;
 Memory.damageThreshold = 2000;
-
-var roleArmy = require('role.army');
-var roleHarvester = require('role.harvester');
-var roleUpgrader = require('role.upgrader');
-var roleBuilder = require('role.builder');
-var roleMaintain = require('role.maintain');
-var roleTower = require('role.tower');
-require('prototype.creep');
-require('prototype.spawn');
-require('prototype.tower');
 
 module.exports.loop = function () {
     var extensionsCount = Game.spawns.Spawn1.countExtensions();
@@ -34,8 +28,11 @@ module.exports.loop = function () {
         if(upgradersCount < Memory.requiredUpgraders) {
             Game.spawns.Spawn1.spawnNewUpgrader(extensionsCount);
         }
-        var constructionSitesMainRoomCount = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES).length;
-        var constructionsSitesExternalCount = 0;
+        Memory.constructionSites = [];
+        var spawnConstructionSites = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
+        for (var i in spawnConstructionSites) {
+            Memory.constructionSites.push(spawnConstructionSites[i]);
+        }
         for (var i in targetRooms) {
             var scoutsCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'scout' &&
                 creep.memory.targetRoom == targetRooms[i]).length;
@@ -43,21 +40,23 @@ module.exports.loop = function () {
                 creep.memory.targetRoom == targetRooms[i]).length;                
             var meleeSoliderCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'meleeSoldier' &&
                 creep.memory.targetRoom == targetRooms[i]).length;
-            constructionsSitesExternalCount = constructionsSitesExternalCount + Game
-                .flags[targetRooms[i]+'Staging'].room.find(FIND_CONSTRUCTION_SITES).length;
+            var externalConstructionSites = Game
+                .flags[targetRooms[i]+'Staging'].room.find(FIND_CONSTRUCTION_SITES);
+            for (var i in externalConstructionSites) {
+                Memory.constructionSites.push(externalConstructionSites[i]);    
+            }
             if (scoutsCount < Memory.scoutsPerRoom) {
                 Game.spawns.Spawn1.spawnNewScout(extensionsCount,targetRooms[i]);
             }
-            if (rangedSoliderCount < Memory.rangedSoldiersPerRoom) {
+            else if (rangedSoliderCount < Memory.rangedSoldiersPerRoom) {
                 Game.spawns.Spawn1.spawnNewRangedSoldier(extensionsCount,targetRooms[i]);
             }
-            if (meleeSoliderCount < Memory.meleeSoldiersPerRoom) {
+            else if (meleeSoliderCount < Memory.meleeSoldiersPerRoom) {
                 Game.spawns.Spawn1.spawnNewMeleeSoldier(extensionsCount,targetRooms[i]);
             }
         }
         var buildersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder').length;
-        if ((constructionSitesMainRoomCount > 0 || constructionsSitesExternalCount > 0) &&
-            buildersCount < Memory.requiredBuilders) {
+        if (Memory.constructionSites.length > 0 && buildersCount < Memory.requiredBuilders) {
             Game.spawns.Spawn1.spawnNewBuilder(extensionsCount);
         }
     }
@@ -78,16 +77,16 @@ module.exports.loop = function () {
             creep.runUpgrader();
         }
         if (creep.memory.role == 'builder') {
-            roleBuilder.run(creep);
+            creep.runBuilder();
         }
         if (creep.memory.role == 'scout') {
-            roleArmy.runScout(creep);
+            creep.runScout();
         }
         if (creep.memory.role == 'rangedSoldier') {
-            roleArmy.runRanged(creep);
+            creep.runRanged();
         }
         if (creep.memory.role == 'meleeSoldier') {
-            roleArmy.runMelee(creep);
+            creep.runMelee();
         }
     }
     
@@ -105,11 +104,4 @@ module.exports.loop = function () {
             delete Memory.creeps[i];
         }
     }
-
-    Creep.prototype.sayHello = function() { 
-        // In prototype functions, 'this' usually has the value of the object calling 
-        // the function. In this case that is whatever creep you are 
-        // calling '.sayHello()' on.
-        this.say("Hello!"); 
-    };
 }
