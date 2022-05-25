@@ -65,12 +65,13 @@ StructureSpawn.prototype.setCreepParts = function(work,carry,ranged,attack,heal,
 };
 
 StructureSpawn.prototype.checkRepairs = function() {
-    var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
+    var targets = this.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
             return (structure.hits < structure.hitsMax &&
                 structure.hits < Memory.damageThreshold);
         }
     });
+    console.log('Tower targets: ' + targets)
     if (targets.length > 100) {
         Memory.damageThreshold = Memory.damageThreshold - 100;
     }

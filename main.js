@@ -1,15 +1,15 @@
 const mainRoom = 'W5S13';
 const targetRooms = ['W5S12'];
 
-Memory.requiredHarvesters = 8;
-Memory.requiredAHarvesters = 3;
+Memory.requiredHarvesters = 6;
+Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
-Memory.requiredUpgraders = 4;
+Memory.requiredUpgraders = 1;
 Memory.requiredMaintainers = 0;
-Memory.requiredBuilders = 1;
+Memory.requiredBuilders = 0;
 Memory.scoutsPerRoom = 1;
-Memory.rangedSoldiersPerRoom = 2;
-Memory.meleeSoldiersPerRoom = 2;
+Memory.rangedSoldiersPerRoom = 1;
+Memory.meleeSoldiersPerRoom = 1;
 
 Memory.damageThreshold = 2000;
 
@@ -72,7 +72,7 @@ module.exports.loop = function () {
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
         if (creep.memory.role == 'harvester') {
-            roleHarvester.run(creep);
+            creep.runHarvester();
         }
         /**if (creep.memory.role == 'harvester' && creep.memory.group != 'C') {
             roleHarvester.run(creep);
