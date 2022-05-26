@@ -1,7 +1,6 @@
 const harvesterASource = '5bbcac9b9099fc012e635d57';
 const harvesterBSource = '5bbcac9b9099fc012e635d56';
 const harvesterCSource = '5bbcac9b9099fc012e635d53';
-
 // ********** Common **********
 
 Creep.prototype.renew = function() {
@@ -228,42 +227,72 @@ Creep.prototype.workBuilder = function() {
 // ********** Scout **********
 
 Creep.prototype.runScout = function() {
-    if (this.room.name != this.memory.targetRoom) {
-        this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+    if (this.memory.status == 'working') {
+        if (this.ticksToLive > 500) {
+            if (this.room.name != this.memory.targetRoom) {
+                this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+            }
+            else {
+                this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+            }
+        }
+        else {
+            this.memory.status = 'renewing';
+        }
     }
     else {
-        this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+        this.renew();
     }
 };
 
 Creep.prototype.runRanged = function() {
-    if (this.room.name != this.memory.targetRoom) {
-        this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+    if (this.memory.status == 'working') {
+        if (this.ticksToLive > 500) {
+            if (this.room.name != this.memory.targetRoom) {
+                this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+            }
+            else {
+                this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+            }
+            var hostiles = this.room.find(FIND_HOSTILE_CREEPS);
+            if(hostiles.length > 0) {
+                var username = hostiles[0].owner.username;
+                Game.notify(`User ${username} spotted in room ${this.room.name}`);
+                this.moveTo(hostiles[0]);
+                this.rangedAttack(hostiles[0]);
+            }
+        }
+        else {
+            this.memory.status = 'renewing';
+        }
     }
     else {
-        this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
-    }
-    var hostiles = this.room.find(FIND_HOSTILE_CREEPS);
-    if(hostiles.length > 0) {
-        var username = hostiles[0].owner.username;
-        Game.notify(`User ${username} spotted in room ${this.room.name}`);
-        this.moveTo(hostiles[0]);
-        this.rangedAttack(hostiles[0]);
+        this.renew();
     }
 };
 
 Creep.prototype.runMelee = function() {
-    if (this.room.name != this.memory.targetRoom) {
-        this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+    if (this.memory.status == 'working') {
+        if (this.ticksToLive > 500) {
+            if (this.room.name != this.memory.targetRoom) {
+                this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+            }
+            else {
+                this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+            }
+            var hostiles = this.room.find(FIND_HOSTILE_CREEPS);
+            if(hostiles.length > 0) {
+                var username = hostiles[0].owner.username;
+                Game.notify(`User ${username} spotted in room ${creep.room.name}`);
+                this.moveTo(hostiles[0]);
+                this.attack(hostiles[0]);
+            }
+        }
+        else {
+            this.memory.status = 'renewing';
+        }
     }
     else {
-        this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
-    }
-    var hostiles = this.room.find(FIND_HOSTILE_CREEPS);
-    if(hostiles.length > 0) {
-        var username = hostiles[0].owner.username;
-        Game.notify(`User ${username} spotted in room ${creep.room.name}`);
-        this.moveTo(hostiles[0]);
-        this.attack(hostiles[0]);
+        this.renew();
     }
 };

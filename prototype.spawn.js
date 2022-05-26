@@ -228,6 +228,7 @@ StructureSpawn.prototype.spawnNewScout = function(extensionCount, targetRoomName
             var creep = Game.creeps[newName];
             creep.memory.role = 'scout';
             creep.memory.targetRoom = targetRoomName;
+            creep.memory.status = 'working';
         }
     }
 };
@@ -284,6 +285,7 @@ StructureSpawn.prototype.spawnNewRangedSoldier = function(extensionCount, target
             var creep = Game.creeps[newName];
             creep.memory.role = 'rangedSoldier';
             creep.memory.targetRoom = targetRoomName;
+            creep.memory.status = 'working';
         }
     }
 };
@@ -340,6 +342,7 @@ StructureSpawn.prototype.spawnNewMeleeSoldier = function (extensionCount, target
             var creep = Game.creeps[newName];
             creep.memory.role = 'meleeSoldier';
             creep.memory.targetRoom = targetRoomName;
+            creep.memory.status = 'working';
         }
     }
 };

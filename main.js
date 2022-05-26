@@ -2,7 +2,6 @@ require('prototype.creep');
 require('prototype.spawn');
 require('prototype.tower');
 
-
 const mainRoom = 'W5S13';
 const targetRooms = ['W5S12'];
 
@@ -12,9 +11,9 @@ Memory.requiredBHarvesters = 2;
 Memory.requiredUpgraders = 1;
 Memory.requiredMaintainers = 0;
 Memory.requiredBuilders = 1;
-Memory.scoutsPerRoom = 0;
-Memory.rangedSoldiersPerRoom = 0;
-Memory.meleeSoldiersPerRoom = 0;
+Memory.scoutsPerRoom = 1;
+Memory.rangedSoldiersPerRoom = 2;
+Memory.meleeSoldiersPerRoom = 2;
 Memory.damageThreshold = 2000;
 
 module.exports.loop = function () {
@@ -30,29 +29,29 @@ module.exports.loop = function () {
         }
         Memory.constructionSites = [];
         var spawnConstructionSites = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
-        for (var i in spawnConstructionSites) {
-            Memory.constructionSites.push(spawnConstructionSites[i]);
+        for (var a in spawnConstructionSites) {
+            Memory.constructionSites.push(spawnConstructionSites[a]);
         }
-        for (var i in targetRooms) {
+        for (var b in targetRooms) {
             var scoutsCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'scout' &&
-                creep.memory.targetRoom == targetRooms[i]).length;
+                creep.memory.targetRoom == targetRooms[b]).length;
             var rangedSoliderCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'rangedSoldier' &&
-                creep.memory.targetRoom == targetRooms[i]).length;                
+                creep.memory.targetRoom == targetRooms[b]).length;                
             var meleeSoliderCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'meleeSoldier' &&
-                creep.memory.targetRoom == targetRooms[i]).length;
+                creep.memory.targetRoom == targetRooms[b]).length;
             var externalConstructionSites = Game
-                .flags[targetRooms[i]+'Staging'].room.find(FIND_CONSTRUCTION_SITES);
-            for (var i in externalConstructionSites) {
-                Memory.constructionSites.push(externalConstructionSites[i]);    
+                .flags[targetRooms[b]+'Staging'].room.find(FIND_CONSTRUCTION_SITES);
+            for (var c in externalConstructionSites) {
+                Memory.constructionSites.push(externalConstructionSites[c]);    
             }
             if (scoutsCount < Memory.scoutsPerRoom) {
-                Game.spawns.Spawn1.spawnNewScout(extensionsCount,targetRooms[i]);
+                Game.spawns.Spawn1.spawnNewScout(extensionsCount,targetRooms[b]);
             }
             else if (rangedSoliderCount < Memory.rangedSoldiersPerRoom) {
-                Game.spawns.Spawn1.spawnNewRangedSoldier(extensionsCount,targetRooms[i]);
+                Game.spawns.Spawn1.spawnNewRangedSoldier(extensionsCount,targetRooms[b]);
             }
             else if (meleeSoliderCount < Memory.meleeSoldiersPerRoom) {
-                Game.spawns.Spawn1.spawnNewMeleeSoldier(extensionsCount,targetRooms[i]);
+                Game.spawns.Spawn1.spawnNewMeleeSoldier(extensionsCount,targetRooms[b]);
             }
         }
         var buildersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder').length;
