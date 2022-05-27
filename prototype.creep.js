@@ -1,6 +1,8 @@
 const harvesterASource = '5bbcac9b9099fc012e635d57';
 const harvesterBSource = '5bbcac9b9099fc012e635d56';
 const harvesterCSource = '5bbcac9b9099fc012e635d53';
+const storageLink = '6290a209ed2320547841a024';
+
 // ********** Common **********
 
 Creep.prototype.renew = function() {
@@ -20,15 +22,15 @@ Creep.prototype.renew = function() {
 };
 
 Creep.prototype.refill = function() {
-    var container = this.pos.findClosestByPath(FIND_STRUCTURES, {
+    let storage = this.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (structure) => {
-            return structure.structureType == STRUCTURE_CONTAINER &&
+            return structure.structureType == STRUCTURE_STORAGE &&
                 structure.store.getUsedCapacity(RESOURCE_ENERGY) > this.store.getFreeCapacity()
         }
     });
-    if (container != null) {
-        this.moveTo(container);
-        this.withdraw(container, RESOURCE_ENERGY);
+    if (storage != null) {
+        this.moveTo(storage);
+        this.withdraw(storage, RESOURCE_ENERGY);
     }
     else {
         this.moveTo(Game.spawns.Spawn1);
@@ -95,7 +97,7 @@ Creep.prototype.depositHarvester = function() {
         }
     }
     if (this.memory.group != 'B') {
-        var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+        let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_EXTENSION &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
@@ -107,7 +109,7 @@ Creep.prototype.depositHarvester = function() {
             };
         }
         else {
-            var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+            let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return structure.structureType == STRUCTURE_SPAWN &&
                         structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
@@ -118,9 +120,9 @@ Creep.prototype.depositHarvester = function() {
                     this.moveTo(target)};
             }
             else {
-                var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return structure.structureType == STRUCTURE_CONTAINER &&
+                        return structure.structureType == STRUCTURE_STORAGE &&
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
                 });
@@ -132,7 +134,7 @@ Creep.prototype.depositHarvester = function() {
         }
     }
     else {
-        var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+        let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_TOWER &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
@@ -144,9 +146,9 @@ Creep.prototype.depositHarvester = function() {
             };
         }
         else {
-            var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+            let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return structure.structureType == STRUCTURE_CONTAINER &&
+                    return structure.structureType == STRUCTURE_STORAGE &&
                         structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
@@ -214,6 +216,7 @@ Creep.prototype.workBuilder = function() {
                 this.moveTo(Memory.constructionSites[0]);
             }
             else {
+                Game.notify("All buildings have been constructed. Builders will now suicide.", 1);
                 this.suicide();
             }
         }
@@ -294,5 +297,38 @@ Creep.prototype.runMelee = function() {
     }
     else {
         this.renew();
+    }
+};
+
+// ********** Couriers **********
+
+Creep.prototype.runCourier = function() {
+    if (this.memory.status == 'working') {
+        this.workCourier();
+    }
+    if (this.memory.status == 'renewing') {
+        this.renew();
+    }
+    if (this.memory.status == 'refilling') {
+        this.refill();
+    }
+};
+
+Creep.prototype.workCourier = function() {
+    if (this.ticksToLive > 500) {
+        if (this.store.getUsedCapacity() == 0) {
+            if (this.withdraw(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+            {
+                this.moveTo(this.room.storage);
+            }
+        }
+        else {
+            if (this.transfer(Game.getObjectById(storageLink), RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(storageLink);
+            }
+        }
+    }
+    else {
+        this.memory.status = 'renewing';
     }
 };

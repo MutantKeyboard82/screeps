@@ -9,8 +9,8 @@ Memory.requiredHarvesters = 6;
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredUpgraders = 1;
-Memory.requiredMaintainers = 0;
 Memory.requiredBuilders = 1;
+Memory.requiredCouriers = 1;
 Memory.scoutsPerRoom = 1;
 Memory.rangedSoldiersPerRoom = 2;
 Memory.meleeSoldiersPerRoom = 2;
@@ -58,6 +58,10 @@ module.exports.loop = function () {
         if (Memory.constructionSites.length > 0 && buildersCount < Memory.requiredBuilders) {
             Game.spawns.Spawn1.spawnNewBuilder(extensionsCount);
         }
+        let couriersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier').length;
+        if (couriersCount < Memory.requiredCouriers) {
+            Game.spawns.Spawn1.spawnNewCourier(extensionsCount);
+        }
     }
      
     //TODO Check for Creeps needing repair.
@@ -86,6 +90,9 @@ module.exports.loop = function () {
         }
         if (creep.memory.role == 'meleeSoldier') {
             creep.runMelee();
+        }
+        if (creep.memory.role == 'courier') {
+            creep.runCourier();
         }
     }
     

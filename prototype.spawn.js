@@ -71,6 +71,7 @@ StructureSpawn.prototype.checkRepairs = function() {
                 structure.hits < Memory.damageThreshold);
         }
     });
+    console.log('Repairing: ' + targets.length);
     if (targets.length > 100) {
         Memory.damageThreshold = Memory.damageThreshold - 100;
     }
@@ -408,6 +409,92 @@ StructureSpawn.prototype.spawnNewBuilder = function (extensionCount) {
         if (this.spawnCreep(parts, newName) == OK) {
             var creep = Game.creeps[newName];
             creep.memory.role = 'builder';
+            creep.memory.status = 'working';
+        }
+    }
+};
+
+// ********** Couriers **********
+
+StructureSpawn.prototype.spawnNewCourier = function (extensionCount) {
+    var newName = 'Courier' + Game.time;
+    console.log('Spawning: ' + newName);
+    /**
+     * @type {BodyPartConstant[]}
+     */
+    var parts;
+    if (this.isEnergyFull()) {
+        // 300
+        if (extensionCount == 0 || extensionCount == 1) {
+            parts = this.setCreepParts(0,4,0,0,0,0,0,2);
+        };
+        // 400
+        if (extensionCount == 2) {
+            parts = this.setCreepParts(0,5,0,0,0,0,0,3);
+        };
+        // 450
+        if (extensionCount == 3 || extensionCount == 4) {
+            parts = this.setCreepParts(0,6,0,0,0,0,0,3);
+        };
+        // 550
+        if (extensionCount == 5) {
+            parts = this.setCreepParts(0,7,0,0,0,0,0,4);
+        };
+        // 600
+        if (extensionCount == 6 || extensionCount == 7) {
+            parts = this.setCreepParts(0,8,0,0,0,0,0,4);
+        };
+        // 700
+        if (extensionCount == 8) {
+            parts = this.setCreepParts(0,9,0,0,0,0,0,5);
+        };
+        // 750
+        if (extensionCount == 9 || extensionCount == 10) {
+            parts = this.setCreepParts(0,10,0,0,0,0,0,5);
+        };
+        // 850
+        if (extensionCount == 11) {
+            parts = this.setCreepParts(0,11,0,0,0,0,0,6);
+        };
+        // 900
+        if (extensionCount == 12 || extensionCount == 13) {
+            parts = this.setCreepParts(0,12,0,0,0,0,0,6);
+        };
+        // 1000
+        if (extensionCount == 14) {
+            parts = this.setCreepParts(0,13,0,0,0,0,0,7);
+        };
+        // 1050
+        if (extensionCount == 15 || extensionCount == 16) {
+            parts = this.setCreepParts(0,14,0,0,0,0,0,7);
+        };
+        // 1150
+        if (extensionCount == 17) {
+            parts = this.setCreepParts(0,15,0,0,0,0,0,8);
+        };
+        // 1200
+        if (extensionCount == 18 || extensionCount == 19) {
+            parts = this.setCreepParts(0,16,0,0,0,0,0,8);
+        };
+        // 1300
+        if (extensionCount == 20) {
+            parts = this.setCreepParts(0,17,0,0,0,0,0,9);
+        };
+        // 1350
+        if (extensionCount == 21 || extensionCount == 22) {
+            parts = this.setCreepParts(0,18,0,0,0,0,0,9);
+        };
+        // 1450
+        if (extensionCount == 23) {
+            parts = this.setCreepParts(0,19,0,0,0,0,0,10);
+        };
+        // 1500
+        if (extensionCount >= 24) {
+            parts = this.setCreepParts(0,20,0,0,0,0,0,10);
+        };
+        if (this.spawnCreep(parts, newName) == OK) {
+            var creep = Game.creeps[newName];
+            creep.memory.role = 'courier';
             creep.memory.status = 'working';
         }
     }
