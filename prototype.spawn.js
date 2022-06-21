@@ -105,6 +105,8 @@ StructureSpawn.prototype.spawnNewHarvester = function(extensionCount) {
             creep.memory.group == 'B').length;
         let harvestersCCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' &&
             creep.memory.group == 'C').length;
+        let harvestersDCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' &&
+            creep.memory.group == 'D').length;    
         if (harvestersACount < Memory.requiredAHarvesters) {
             creep.memory.group = 'A';
             creep.memory.room = 'E37N53';
@@ -117,9 +119,13 @@ StructureSpawn.prototype.spawnNewHarvester = function(extensionCount) {
             creep.memory.group = 'C';
             creep.memory.room = 'E38N53';
         }
-        else {
+        else if (harvestersDCount < Memory.requiredDHarvesters) {
             creep.memory.group = 'D'
             creep.memory.room = 'E38N53';
+        }
+        else {
+            creep.memory.group = 'E';
+            creep.memory.room = 'E37N53';
         }
         creep.memory.status = 'working';
     }
@@ -356,6 +362,8 @@ StructureSpawn.prototype.spawnNewCourier = function (extensionCount) {
         creep.memory.group == 'E').length;
     let countF = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier' &&
         creep.memory.group == 'F').length;
+    let countG = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier' &&
+        creep.memory.group == 'G').length;
     /**
      * @type {BodyPartConstant[]}
      */
@@ -386,7 +394,10 @@ StructureSpawn.prototype.spawnNewCourier = function (extensionCount) {
         parts = this.setCreepParts(0,1,0,0,0,0,0,1);
     }
     else if (countF < Memory.requiredFCouriers) {
-        parts = this.setCreepParts(0,1,0,0,0,0,0,1);
+        parts = this.setCreepParts(0,8,0,0,0,0,0,4);
+    }
+    else if (countG < Memory.requiredGCouriers) {
+        parts = this.setCreepParts(0,1,0,0,0,0,0,1)
     }
     else {
         parts = this.setCreepParts(0,24,0,0,0,0,0,12);
@@ -418,6 +429,10 @@ StructureSpawn.prototype.spawnNewCourier = function (extensionCount) {
         else if (countF < Memory.requiredFCouriers) {
             creep.memory.group ='F';
             creep.memory.room = 'E38N53';
+        }
+        else if (countG < Memory.requiredGCouriers) {
+            creep.memory.group ='G';
+            creep.memory.room = 'E37N53';
         }
     }
 };

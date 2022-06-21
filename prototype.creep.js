@@ -2,13 +2,16 @@ const harvesterASource = '5bbcaf199099fc012e63a294';
 const harvesterBSource = '5bbcaf199099fc012e63a292';
 const harvesterCSource = '5bbcaf299099fc012e63a41a';
 const harvesterDSource = '5bbcaf299099fc012e63a41b';
+const harvesterESource = '5bbcb63dd867df5e5420765b';
 const harvesterAContainer = '62a71d7c32257f80d344bf9d';
 const harvesterBContainer = '62a72a26b8a54ccad0805011';
 const harvesterCContainer = '62a757762a4378445682664e';
 const harvesterDContainer = '62a7819fb8a54c9117806992';
+const harvesterEContainer = '62b04a632248f16ecf28f27a';
 const E38N53UpgraderContainer = '62a76f28184dec14e94c02c8';
 const E38N53TowerA = '62a2f9fb2a437898bb812c69';
 const storageLink = '6290a209ed2320547841a024';
+const terminalId = '62b09387374762559ea35256';
 
 // ********** Common **********
 
@@ -128,6 +131,9 @@ Creep.prototype.workHarvester = function() {
         else if (this.memory.group == 'D') {
             source = Game.getObjectById(harvesterDSource);
             container = Game.getObjectById(harvesterDContainer);
+        }
+        else if (this.memory.group == 'E') {
+            source = Game.getObjectById(harvesterESource);
         }
         if (container != null) {
             if (this.pos.isEqualTo(container)) {
@@ -473,6 +479,32 @@ Creep.prototype.workCourier = function() {
             }
         }
     }
+    else if (this.memory.group == 'G') {
+        if (this.store.getFreeCapacity(RESOURCE_HYDROGEN) > 0) {
+            let target = Game.getObjectById(harvesterEContainer);
+            if (this.withdraw(target, RESOURCE_HYDROGEN) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target)
+            }
+        }
+        else {
+            if (this.store.getUsedCapacity(RESOURCE_HYDROGEN) > 0) {
+                /** 
+                 * @type { StructureTerminal } targetTerminal 
+                 */
+                let targetTerminal = Game.getObjectById(terminalId);
+                if (targetTerminal.store.getUsedCapacity(RESOURCE_HYDROGEN) < 300000) {
+                    if (this.transfer(targetTerminal, RESOURCE_HYDROGEN) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(targetTerminal);
+                    }
+                }
+                else {
+                    if (this.transfer(this.room.storage, RESOURCE_HYDROGEN) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(this.room.storage);
+                    }
+                }
+            }
+        }
+    }
 };
 
 Creep.prototype.depositCourier = function() {
@@ -513,6 +545,12 @@ Creep.prototype.depositCourier = function() {
                         this.moveTo(target)
                     };
                 }
+                /**else {
+                    target = Game.getObjectById(terminalId);
+                    if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
+                    }
+                }**/
                 else {
                     target = this.room.storage;
                     if (target != null) {

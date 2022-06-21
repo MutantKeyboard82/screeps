@@ -4,22 +4,24 @@ require('prototype.tower');
 
 // const controllerLinkId = '62960284dadced3e841e6c9a';
 
-Memory.requiredHarvesters = 4;
+Memory.requiredHarvesters = 5;
 Memory.requiredAHarvesters = 1;
 Memory.requiredBHarvesters = 1;
 Memory.requiredCHarvesters = 1;
 Memory.requiredDHarvesters = 1;
-Memory.requiredUpgraders = 3;
-Memory.requiredAUpgraders = 2;
+Memory.requiredEHarvesters = 1;
+Memory.requiredUpgraders = 2;
+Memory.requiredAUpgraders = 1;
 Memory.requiredBUpgraders = 1;
-Memory.requiredBuilders = 1;
-Memory.requiredCouriers = 7;
+Memory.requiredBuilders = 3;
+Memory.requiredCouriers = 8;
 Memory.requiredACouriers = 1;
 Memory.requiredBCouriers = 2;
 Memory.requiredCCouriers = 1;
 Memory.requiredDCouriers = 1;
 Memory.requiredECouriers = 1;
 Memory.requiredFCouriers = 1;
+Memory.requiredGCouriers = 1;
 Memory.scoutsPerRoom = 0;
 Memory.rangedSoldiersPerRoom = 0;
 Memory.meleeSoldiersPerRoom = 0;
@@ -135,6 +137,23 @@ console.log('********** Start tick ' + Game.time + ' **********');
             Game.spawns['Spawn1'].pos.x + 1, 
             Game.spawns['Spawn1'].pos.y, 
             {align: 'left', opacity: 0.8});
+    }
+
+    let amountToBuy = 50;
+    let maxTransferEnergyCost = 50;
+    let orders = Game.market.getAllOrders({type: ORDER_BUY, resourceType: RESOURCE_HYDROGEN});
+
+    for(let i=0; i<orders.length; i++) {
+        const transferEnergyCost = Game.market.calcTransactionCost(
+            amountToBuy, 'E37N53', orders[i].roomName);
+        console.log('Remaining Amount: ' + orders[i].remainingAmount);
+        console.log('TransferCost: ' + transferEnergyCost);
+        console.log('Price: ' + orders[i].price);
+
+        if(orders[i].price > 9) {
+            console.log(Game.market.deal(orders[i].id, amountToBuy, 'E37N53'));
+            break;
+        }
     }
     
     for(var i in Memory.creeps) {
