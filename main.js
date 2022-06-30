@@ -1,27 +1,43 @@
+// BUG
+// HACK
+// FIXME
+// TODO
+// XXX
+// [ ]
+// [x]
+
 require('prototype.creep');
 require('prototype.spawn');
 require('prototype.tower');
 
-// const controllerLinkId = '62960284dadced3e841e6c9a';
-
-Memory.requiredHarvesters = 5;
+Memory.requiredHarvesters = 6;
 Memory.requiredAHarvesters = 1;
-Memory.requiredBHarvesters = 1;
-Memory.requiredCHarvesters = 1;
-Memory.requiredDHarvesters = 1;
-Memory.requiredEHarvesters = 1;
-Memory.requiredUpgraders = 2;
+Memory.requiredBHarvesters = 1; 
+Memory.requiredCHarvesters = 1; // E38N53
+Memory.requiredDHarvesters = 1; // E38N53
+Memory.requiredEHarvesters = 0; // Miner - E37N53
+Memory.requiredFHarvesters = 1; // E37N54
+Memory.requiredGHarvesters = 1; // E37N54
+Memory.requiredUpgraders = 3;
 Memory.requiredAUpgraders = 1;
-Memory.requiredBUpgraders = 1;
-Memory.requiredBuilders = 3;
+Memory.requiredBUpgraders = 1; // E38N53
+Memory.requiredCUpgraders = 1; // E37N54
+Memory.requiredBuilders = 1;
 Memory.requiredCouriers = 8;
 Memory.requiredACouriers = 1;
-Memory.requiredBCouriers = 2;
-Memory.requiredCCouriers = 1;
-Memory.requiredDCouriers = 1;
-Memory.requiredECouriers = 1;
-Memory.requiredFCouriers = 1;
-Memory.requiredGCouriers = 1;
+Memory.requiredBCouriers = 1; // Source B Link Sorter.
+Memory.requiredCCouriers = 1; // E38N53
+Memory.requiredDCouriers = 1; // E38N53
+Memory.requiredECouriers = 1; // Home link sorter.
+Memory.requiredFCouriers = 1; // E38N53 to E37N53.
+Memory.requiredHCouriers = 1; // E37N54 - Left.
+Memory.requiredICouriers = 1; // E37N54 - Right.
+Memory.requiredSorters = 2;
+Memory.requiredRovers = 1;
+Memory.requiredARovers = 1; // E37N54
+Memory.nextRoom = 'E36N53';
+Memory.requiredBRovers = 0; // E36N53
+Memory.followingRoom = 'E36N53';
 Memory.scoutsPerRoom = 0;
 Memory.rangedSoldiersPerRoom = 0;
 Memory.meleeSoldiersPerRoom = 0;
@@ -30,30 +46,53 @@ Memory.mainRoom = 'E37N53';
 Memory.depositLinkAId = '62a884e74534e8471716d322';
 Memory.storeLinkId = '62a8425c9d9375fa022b741a';
 
+/**
+ * ID of the harvesting Link in E37N53.
+ */
+const harvesterBLink = '62b498f68317ed423f1fc191';
+
 module.exports.loop = function () {
 console.log('********** Start tick ' + Game.time + ' **********');
 
     var extensionsCount = Game.spawns.Spawn1.countExtensions();
-    let couriersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier').length;
-    if (couriersCount < Memory.requiredCouriers) {
-        Game.spawns.Spawn1.spawnNewCourier(extensionsCount);
+    let sortersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'sorter').length;
+    if (sortersCount < Memory.requiredSorters) {
+        Game.spawns.Spawn1.spawnNewSorter();
     }
     else {
-        let harvestersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester').length;
-        if (harvestersCount < Memory.requiredHarvesters) {
-            Game.spawns.Spawn1.spawnNewHarvester(extensionsCount);
-        }   
-        let upgradersCount = _.filter (Game.creeps, (creep) => creep.memory.role == 'upgrader').length;
-        if(upgradersCount < Memory.requiredUpgraders) {
-            Game.spawns.Spawn1.spawnNewUpgrader(extensionsCount);
+        let couriersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier').length;
+        if (couriersCount < Memory.requiredCouriers) {
+            Game.spawns.Spawn1.spawnNewCourier(extensionsCount);
         }
-        let buildersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder').length;
-        let constructionSites = _.filter(Game.constructionSites);
-        console.log('Construction Sites: ' + constructionSites.length);
-        if (constructionSites.length > 0 && buildersCount < Memory.requiredBuilders) {
-            Game.spawns.Spawn1.spawnNewBuilder(extensionsCount);
+        else {
+            let harvestersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester').length;
+            if (harvestersCount < Memory.requiredHarvesters) {
+                Game.spawns.Spawn1.spawnNewHarvester(extensionsCount);
+            }
+            if (Game.spawns.Spawn1.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 10000) {   
+                let upgradersCount = _.filter (Game.creeps, (creep) => creep.memory.role == 'upgrader').length;
+                if(upgradersCount < Memory.requiredUpgraders) {
+                    Game.spawns.Spawn1.spawnNewUpgrader(extensionsCount);
+                }
+                let buildersCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder').length;
+                let constructionSites = _.filter(Game.constructionSites);
+                console.log('Construction Sites: ' + constructionSites.length);
+                if (constructionSites.length > 0 && buildersCount < Memory.requiredBuilders) {
+                    Game.spawns.Spawn1.spawnNewBuilder(extensionsCount);
+                }
+                let roversCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'rover').length;
+                if (roversCount < Memory.requiredRovers) {
+                    Game.spawns.Spawn1.spawnNewRover();
+                }
+                let meleeCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'meleeSoldier').length;
+                if (meleeCount < Memory.meleeSoldiersPerRoom) {
+                    Game.spawns.Spawn1.spawnNewMeleeSoldier();
+                }
+            }
+            else {
+                Game.notify('Energy storage in Main Room has dropped below 10,000');
+            }
         }
-        
     }
 
     let myRooms = _.filter(Game.rooms);
@@ -66,19 +105,13 @@ console.log('********** Start tick ' + Game.time + ' **********');
     }
     if (Memory.structuresToRepair.length == 0) {
         console.log('Increasing Threshold');
-        if (Memory.damageThreshold < 250000) {
+        if (Memory.damageThreshold < 300000000) {
             Memory.damageThreshold = Memory.damageThreshold + 1000;
         }
     }
+
     myRooms.forEach(room => FindMyTowers(room));
     myTowers.forEach(tower => tower.defendRoom())
-
-    /**let mainRoomTowers = Game.rooms[Memory.mainRoom].find(FIND_MY_STRUCTURES, {
-            filter: {
-                structureType: STRUCTURE_TOWER
-            }
-    });
-    mainRoomTowers.forEach(tower => tower.defendRoom(Memory.mainRoom));**/
 
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
@@ -103,6 +136,12 @@ console.log('********** Start tick ' + Game.time + ' **********');
         if (creep.memory.role == 'courier') {
             creep.runCourier();
         }
+        if (creep.memory.role == 'sorter') {
+            creep.workSorter();
+        }
+        if (creep.memory.role == 'rover') {
+            creep.workRover();
+        }
         if (creep.name == 'Voyager1') {
             if (creep.room.name != creep.memory.room) {
                 let route = Game.map.findRoute(creep.room, creep.memory.room);
@@ -125,9 +164,20 @@ console.log('********** Start tick ' + Game.time + ' **********');
     }
 
     let depositLink = Game.getObjectById(Memory.depositLinkAId);
+    /**
+     * @type {StructureLink}
+     */
     let storeLink = Game.getObjectById(Memory.storeLinkId);
     if (depositLink.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
         depositLink.transferEnergy(storeLink);
+    }
+
+    /**
+     * @type {StructureLink}
+     */
+    let harvestingLink = Game.getObjectById(harvesterBLink);
+    if (harvestingLink.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+        harvestingLink.transferEnergy(storeLink);
     }
     
     if(Game.spawns['Spawn1'].spawning) { 
@@ -146,12 +196,8 @@ console.log('********** Start tick ' + Game.time + ' **********');
     for(let i=0; i<orders.length; i++) {
         const transferEnergyCost = Game.market.calcTransactionCost(
             amountToBuy, 'E37N53', orders[i].roomName);
-        console.log('Remaining Amount: ' + orders[i].remainingAmount);
-        console.log('TransferCost: ' + transferEnergyCost);
-        console.log('Price: ' + orders[i].price);
-
         if(orders[i].price > 9) {
-            console.log(Game.market.deal(orders[i].id, amountToBuy, 'E37N53'));
+            Game.market.deal(orders[i].id, amountToBuy, 'E37N53');
             break;
         }
     }
@@ -162,6 +208,10 @@ console.log('********** Start tick ' + Game.time + ' **********');
         }
     }
 
+    /**
+     * Finds the Towers in the given Room name.
+     * @param {string} room 
+     */
     function FindMyTowers(room) {
         let roomTowers = Game.rooms[room.name].find(FIND_MY_STRUCTURES, {
             filter: {

@@ -3,11 +3,17 @@ const harvesterBSource = '5bbcaf199099fc012e63a292';
 const harvesterCSource = '5bbcaf299099fc012e63a41a';
 const harvesterDSource = '5bbcaf299099fc012e63a41b';
 const harvesterESource = '5bbcb63dd867df5e5420765b';
-const harvesterAContainer = '62a71d7c32257f80d344bf9d';
-const harvesterBContainer = '62a72a26b8a54ccad0805011';
-const harvesterCContainer = '62a757762a4378445682664e';
-const harvesterDContainer = '62a7819fb8a54c9117806992';
+/** Harvester F Source */
+const harvesterFSource = '5bbcaf189099fc012e63a290'; // E37N54 - 18,33
+const harvesterGSource = '5bbcaf189099fc012e63a28f'; // E37N54 - 46,25
+const harvesterAContainer = '62b9a43366467dccb3ee8722';
+const harvesterBContainer = '62b9d1f258235bc41955ba38';
+const harvesterBLink = '62b498f68317ed423f1fc191';
+const harvesterCContainer = '62ba3293374762de0aa64793';
+const harvesterDContainer = '62ba3768aeb2d8ba67191910';
 const harvesterEContainer = '62b04a632248f16ecf28f27a';
+const harvesterFContainer = '62baf2a31937aa3eebef70f4';
+const harvesterGContainer = '62bafccf95b762328ba8a67e';
 const E38N53UpgraderContainer = '62a76f28184dec14e94c02c8';
 const E38N53TowerA = '62a2f9fb2a437898bb812c69';
 const storageLink = '6290a209ed2320547841a024';
@@ -33,7 +39,10 @@ Creep.prototype.renew = function() {
 
 Creep.prototype.refill = function() {
     if (this.withdraw(this.room.storage, RESOURCE_ENERGY) == ERR_INVALID_TARGET) {
-        let droppedResources = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+        let droppedResources = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+            filter: (resources) =>
+                resources.amount > this.store.getFreeCapacity(RESOURCE_ENERGY)
+        });
         if (droppedResources != null) {
             if (this.pickup(droppedResources) == ERR_NOT_IN_RANGE) {
                 this.moveTo(droppedResources);
@@ -49,6 +58,9 @@ Creep.prototype.refill = function() {
                 if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     this.moveTo(container);
                 }
+            }
+            else {
+                this.moveToHomeRoom();
             }
         }
     }
@@ -110,6 +122,9 @@ Creep.prototype.runHarvester = function() {
 };
 
 Creep.prototype.workHarvester = function() {
+     /**
+             * @type {Source}
+             */
     let source;
     let container;
     if (this.room.name != this.memory.room) {
@@ -134,6 +149,14 @@ Creep.prototype.workHarvester = function() {
         }
         else if (this.memory.group == 'E') {
             source = Game.getObjectById(harvesterESource);
+        }
+        else if (this.memory.group == 'F') {
+            source = Game.getObjectById(harvesterFSource);
+            container = Game.getObjectById(harvesterFContainer);
+        }
+        else if (this.memory.group == 'G') {
+            source = Game.getObjectById(harvesterGSource);
+            container = Game.getObjectById(harvesterGContainer);
         }
         if (container != null) {
             if (this.pos.isEqualTo(container)) {
@@ -346,15 +369,15 @@ Creep.prototype.runRanged = function() {
 
 Creep.prototype.runMelee = function() {
     if (this.memory.status == 'working') {
-        if (this.room.name != this.memory.targetRoom) {
-            this.moveTo(new RoomPosition(23, 48, this.memory.targetRoom));
+        if (this.room.name != this.memory.room) {
+            this.moveToTargetRoom();
         }
         else {
-            this.moveTo(Game.flags[this.memory.targetRoom+'Staging']);
+            this.moveTo(this.room.controller);
         }
-        var hostiles = this.room.find(FIND_HOSTILE_CREEPS);
+        let hostiles = this.room.find(FIND_HOSTILE_CREEPS);
         if(hostiles.length > 0) {
-            var username = hostiles[0].owner.username;
+            let username = hostiles[0].owner.username;
             //Game.notify(`User ${username} spotted in room ${creep.room.name}`);
             this.moveTo(hostiles[0]);
             this.attack(hostiles[0]);
@@ -384,7 +407,8 @@ Creep.prototype.runCourier = function() {
 
 Creep.prototype.workCourier = function() {
     let container;
-    if (this.memory.group == 'A' || this.memory.group == 'B') {
+    
+    if (this.memory.group == 'A') {
         if (this.memory.group == 'A') {
             container = Game.getObjectById(harvesterAContainer);
         }
@@ -412,6 +436,28 @@ Creep.prototype.workCourier = function() {
             this.memory.status = 'depositing';
         }
     }
+    else if (this.memory.group == 'B') {
+        container = Game.getObjectById(harvesterBContainer);
+        let link = Game.getObjectById(harvesterBLink);
+        if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            if (container != null) {
+                if (this.withdraw(container,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(container);
+                }
+            }
+            else {
+                let target = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+                if (this.pickup(target) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(target);
+                }
+            }
+        }
+        else {
+            if (this.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(link);
+            }
+        }
+    }
     else if (this.memory.group == 'C') {
         if (this.room.name != this.memory.room) {
             this.moveToTargetRoom();
@@ -422,6 +468,12 @@ Creep.prototype.workCourier = function() {
                 if (container != null) {
                     if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         this.moveTo(container);
+                    }
+                }
+                else {
+                    let target = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+                    if (this.pickup(target) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
                     }
                 }
             }
@@ -440,6 +492,12 @@ Creep.prototype.workCourier = function() {
                 if (container != null) {
                     if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         this.moveTo(container);
+                    }
+                }
+                else {
+                    let target = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+                    if (this.pickup(target) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
                     }
                 }
             }
@@ -467,8 +525,10 @@ Creep.prototype.workCourier = function() {
                 this.moveToTargetRoom();
             }
             else {
-                if (this.withdraw(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    this.moveTo(this.room.storage);
+                if (this.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 10000) {
+                    if (this.withdraw(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(this.room.storage);
+                    }
                 }
             }
         }
@@ -480,35 +540,86 @@ Creep.prototype.workCourier = function() {
         }
     }
     else if (this.memory.group == 'G') {
-        if (this.store.getFreeCapacity(RESOURCE_HYDROGEN) > 0) {
-            let target = Game.getObjectById(harvesterEContainer);
-            if (this.withdraw(target, RESOURCE_HYDROGEN) == ERR_NOT_IN_RANGE) {
-                this.moveTo(target)
+        if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            if (this.room.name != this.memory.room) {
+                this.moveToTargetRoom();
+            }
+            else {
+                let target = Game.getObjectById(harvesterFContainer);
+                if (this.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(target);
+                }
             }
         }
         else {
-            if (this.store.getUsedCapacity(RESOURCE_HYDROGEN) > 0) {
-                /** 
-                 * @type { StructureTerminal } targetTerminal 
-                 */
-                let targetTerminal = Game.getObjectById(terminalId);
-                if (targetTerminal.store.getUsedCapacity(RESOURCE_HYDROGEN) < 300000) {
-                    if (this.transfer(targetTerminal, RESOURCE_HYDROGEN) == ERR_NOT_IN_RANGE) {
-                        this.moveTo(targetTerminal);
-                    }
-                }
-                else {
-                    if (this.transfer(this.room.storage, RESOURCE_HYDROGEN) == ERR_NOT_IN_RANGE) {
-                        this.moveTo(this.room.storage);
-                    }
+            this.memory.status = 'depositing';
+        }
+    }
+    else if (this.memory.group == 'H') {
+        if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            if (this.room.name != this.memory.room) {
+                this.moveToTargetRoom();
+            }
+            else {
+                let target = Game.getObjectById(harvesterFContainer);
+                if (this.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(target);
                 }
             }
+        }
+        else {
+            this.memory.status = 'depositing';
+        }
+    }
+    else if (this.memory.group == 'I') {
+        if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            if (this.room.name != this.memory.room) {
+                this.moveToTargetRoom();
+            }
+            else {
+                let target = Game.getObjectById(harvesterGContainer);
+                if (this.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(target);
+                }
+            }
+        }
+        else {
+            this.memory.status = 'depositing';
         }
     }
 };
 
 Creep.prototype.depositCourier = function() {
-    let target;
+    if (this.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+        if (this.memory.room != Memory.mainRoom) {
+            let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return structure.structureType == STRUCTURE_TOWER &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                }
+            });
+            if (target != null) {
+                if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(target);
+                }
+            }
+            else {
+                if (this.transfer(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(this.room.storage);
+                }
+            }
+        }
+        else {
+            if (this.transfer(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(this.room.storage);
+            }
+        }
+    }
+    else {
+        this.memory.status = 'working';
+    }
+
+    /**let target;
     if (this.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
         target = this.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (structure) => {
@@ -550,7 +661,7 @@ Creep.prototype.depositCourier = function() {
                     if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         this.moveTo(target);
                     }
-                }**/
+                }
                 else {
                     target = this.room.storage;
                     if (target != null) {
@@ -564,5 +675,72 @@ Creep.prototype.depositCourier = function() {
     }
     else {
         this.memory.status = 'working';
+    }**/
+};
+
+Creep.prototype.workSorter = function() {
+    if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
+        if (this.withdraw(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            this.moveTo(this.room.storage);
+        }
+    }
+    else {
+        let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return structure.structureType == STRUCTURE_EXTENSION &&
+                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+            }
+        });
+        if (target != null) {
+            if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target);
+            }
+        }
+        else {
+            let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return structure.structureType == STRUCTURE_SPAWN &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                }
+            });
+            if (target != null) {
+                if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(target);
+                }
+            }
+            else {
+                let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return structure.structureType == STRUCTURE_TOWER &&
+                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                        }
+                });
+                if(target != null) {
+                    if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
+                    };
+                }
+                else {
+                    if (this.transfer(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(this.room.storage);
+                    }
+                }
+            }
+        }
+    }
+};
+
+Creep.prototype.workRover = function() {
+    if (this.room.name != this.memory.room) {
+        this.moveToTargetRoom()
+    }
+    else {
+        if (this.reserveController(this.room.controller) == ERR_NOT_IN_RANGE) {
+            this.moveTo(this.room.controller);
+        }
+        else {
+            this.signController(this.room.controller,
+                'This room is under the control of The Hidden Guild - https://discord.gg/WRDG6Sy');
+        }
     }
 };

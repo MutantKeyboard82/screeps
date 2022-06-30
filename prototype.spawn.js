@@ -106,7 +106,13 @@ StructureSpawn.prototype.spawnNewHarvester = function(extensionCount) {
         let harvestersCCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' &&
             creep.memory.group == 'C').length;
         let harvestersDCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' &&
-            creep.memory.group == 'D').length;    
+            creep.memory.group == 'D').length;  
+        let harvestersECount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' &&
+            creep.memory.group == 'E').length;  
+        let harvestersFCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' &&
+            creep.memory.group == 'F').length;
+        let harvestersGCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' &&
+            creep.memory.group == 'G').length;
         if (harvestersACount < Memory.requiredAHarvesters) {
             creep.memory.group = 'A';
             creep.memory.room = 'E37N53';
@@ -120,12 +126,20 @@ StructureSpawn.prototype.spawnNewHarvester = function(extensionCount) {
             creep.memory.room = 'E38N53';
         }
         else if (harvestersDCount < Memory.requiredDHarvesters) {
-            creep.memory.group = 'D'
+            creep.memory.group = 'D';
             creep.memory.room = 'E38N53';
         }
-        else {
+        else if (harvestersECount < Memory.requiredEHarvesters) {
             creep.memory.group = 'E';
             creep.memory.room = 'E37N53';
+        }
+        else if (harvestersFCount < Memory.requiredFHarvesters) {
+            creep.memory.group = 'F';
+            creep.memory.room = 'E37N54';
+        }
+        else if (harvestersGCount < Memory.requiredGHarvesters) {
+            creep.memory.group = 'G';
+            creep.memory.room = 'E37N54';
         }
         creep.memory.status = 'working';
     }
@@ -152,6 +166,9 @@ StructureSpawn.prototype.spawnNewUpgrader = function(extensionCount) {
     else if (extensionCount < 30) {
         parts = this.setCreepParts(6,7,0,0,0,0,0,7)
     }
+    else if (extensionCount <= 40) {
+        parts = this.setCreepParts(9,9,0,0,0,0,0,9)
+    }
     /**else if (!this.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
             structure.structureType == STRUCTURE_LINK
@@ -166,11 +183,16 @@ StructureSpawn.prototype.spawnNewUpgrader = function(extensionCount) {
         let creep = Game.creeps[newName];
         let upgradersACount = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' &&
             creep.memory.room == Memory.mainRoom).length;
+        let upgradersBCount = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' &&
+            creep.memory.room == 'E38N53').length;
         if (upgradersACount < Memory.requiredAUpgraders) {
             creep.memory.room = Memory.mainRoom;
         }
-        else {
+        else if (upgradersBCount < Memory.requiredBUpgraders) {
             creep.memory.room = 'E38N53';
+        }
+        else {
+            creep.memory.room = 'E37N54';
         }
         creep.memory.role = 'upgrader';
         creep.memory.status = 'refilling';
@@ -257,60 +279,18 @@ StructureSpawn.prototype.spawnNewRangedSoldier = function(extensionCount, target
     }
 };
 
-StructureSpawn.prototype.spawnNewMeleeSoldier = function (extensionCount, targetRoomName) {
-    var newName = 'Melee' + Game.time;
+StructureSpawn.prototype.spawnNewMeleeSoldier = function () {
+    let newName = 'Melee' + Game.time;
     console.log('Spawning: ' + newName);
     /**
      * @type {BodyPartConstant[]}
      */
-    var parts;
-    if (this.isEnergyFull()) {
-        // 300
-        if (extensionCount == 0) {
-            parts = this.setCreepParts(0,0,0,2,0,0,0,2);
-        }
-        // 350
-        if (extensionCount == 1 || extensionCount == 2) {
-            parts = this.setCreepParts(0,0,0,2,0,0,0,2);
-        }
-        // 450
-        if (extensionCount == 3 || extensionCount == 4) {
-            parts = this.setCreepParts(0,0,0,3,0,0,0,3);
-        }
-        // 550
-        if (extensionCount == 5 || extensionCount == 6) {
-            parts = this.setCreepParts(0,0,0,4,0,0,0,4);
-        }
-        // 650
-        if (extensionCount == 7 || extensionCount == 8 || extensionCount == 9) {
-            parts = this.setCreepParts(0,0,0,5,0,0,0,5);
-        }
-        // 800
-        if (extensionCount == 10 || extensionCount == 11 || extensionCount == 12) {
-            parts = this.setCreepParts(0,0,0,6,0,0,0,6);
-        }
-        // 950
-        if (extensionCount == 13 || extensionCount == 14) {
-            parts = this.setCreepParts(0,0,0,7,0,0,0,7);
-        }
-        // 1050
-        if (extensionCount == 15 || extensionCount == 16 || extensionCount == 17) {
-            parts = this.setCreepParts(0,0,0,8,0,0,0,8);
-        }
-        // 1200
-        if (extensionCount == 18 || extensionCount == 19) {
-            parts = this.setCreepParts(0,0,0,9,0,0,0,9);
-        }
-        // 1300
-        if (extensionCount >= 20) {
-            parts = this.setCreepParts(0,0,0,10,0,0,0,10);
-        }
-        if (this.spawnCreep(parts, newName) == OK) {
-            var creep = Game.creeps[newName];
-            creep.memory.role = 'meleeSoldier';
-            creep.memory.targetRoom = targetRoomName;
-            creep.memory.status = 'working';
-        }
+    let parts = this.setCreepParts(0,0,0,18,0,0,0,9);
+    if (this.spawnCreep(parts, newName) == OK) {
+        let creep = Game.creeps[newName];
+        creep.memory.role = 'meleeSoldier';
+        creep.memory.room = 'E37N54';
+        creep.memory.status = 'working';
     }
 };
 
@@ -334,6 +314,9 @@ StructureSpawn.prototype.spawnNewBuilder = function (extensionCount) {
     }
     else if (extensionCount < 30) {
         parts = this.setCreepParts(6,7,0,0,0,0,0,7)
+    }
+    else if (extensionCount <= 40) {
+        parts = this.setCreepParts(9,9,0,0,0,0,0,9)
     }
     else {
         parts = this.setCreepParts(9,9,0,0,0,0,0,9);
@@ -364,6 +347,10 @@ StructureSpawn.prototype.spawnNewCourier = function (extensionCount) {
         creep.memory.group == 'F').length;
     let countG = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier' &&
         creep.memory.group == 'G').length;
+    let countH = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier' &&
+        creep.memory.group == 'H').length;
+    let countI = _.filter(Game.creeps, (creep) => creep.memory.role == 'courier' &&
+        creep.memory.group == 'I').length;
     /**
      * @type {BodyPartConstant[]}
      */
@@ -377,27 +364,28 @@ StructureSpawn.prototype.spawnNewCourier = function (extensionCount) {
         }
     }
     else if (countB < Memory.requiredBCouriers) {
-        if (extensionCount >= 8) {
-            parts = this.setCreepParts(0,9,0,0,0,0,0,5);
-        }
-        else {
-            parts = this.setCreepParts(0,4,0,0,0,0,0,2);
-        }
+        parts = this.setCreepParts(0,1,0,0,0,0,0,1);
     }
     else if (countC < Memory.requiredCCouriers) {
-        parts = this.setCreepParts(0,5,0,0,0,0,0,3);
+        parts = this.setCreepParts(0,3,0,0,0,0,0,2);
     }
     else if (countD < Memory.requiredDCouriers) {
         parts = this.setCreepParts(0,6,0,0,0,0,0,3);
     }
     else if (countE < Memory.requiredECouriers) {
-        parts = this.setCreepParts(0,1,0,0,0,0,0,1);
+        parts = this.setCreepParts(0,2,0,0,0,0,0,1);
     }
     else if (countF < Memory.requiredFCouriers) {
         parts = this.setCreepParts(0,8,0,0,0,0,0,4);
     }
     else if (countG < Memory.requiredGCouriers) {
-        parts = this.setCreepParts(0,1,0,0,0,0,0,1)
+        parts = this.setCreepParts(0,4,0,0,0,0,0,2)
+    }
+    else if (countH < Memory.requiredHCouriers) {
+        parts = this.setCreepParts(0,7,0,0,0,0,0,4)
+    }
+    else if (countI < Memory.requiredICouriers) {
+        parts = this.setCreepParts(0,13,0,0,0,0,0,7)
     }
     else {
         parts = this.setCreepParts(0,24,0,0,0,0,0,12);
@@ -433,6 +421,46 @@ StructureSpawn.prototype.spawnNewCourier = function (extensionCount) {
         else if (countG < Memory.requiredGCouriers) {
             creep.memory.group ='G';
             creep.memory.room = 'E37N53';
+        }
+        else if (countH < Memory.requiredHCouriers) {
+            creep.memory.group ='H';
+            creep.memory.room = 'E37N54';
+        }
+        else if (countI < Memory.requiredICouriers) {
+            creep.memory.group ='I';
+            creep.memory.room = 'E37N54';
+        }
+    }
+};
+
+StructureSpawn.prototype.spawnNewSorter = function(targetRoom) {
+    let newName = 'Sorter' + Game.time;
+    console.log('Spawning: ' + newName);
+    let parts = this.setCreepParts(0,4,0,0,0,0,0,2);
+    if (this.spawnCreep(parts, newName) == OK) {
+        let creep = Game.creeps[newName];
+        creep.memory.role = 'sorter';
+        creep.memory.status = 'working';
+        creep.memory.room = targetRoom;
+    }
+};
+
+StructureSpawn.prototype.spawnNewRover = function() {
+    let newName = 'Rover' + Game.time;
+    console.log('Spawning: ' + newName);
+    let parts = this.setCreepParts(0,0,0,0,0,3,0,2);
+    if (this.spawnCreep(parts, newName) == OK) {
+        let creep = Game.creeps[newName];
+        creep.memory.role = 'rover';
+        let countA = _.filter(Game.creeps, (creep) => creep.memory.role == 'rover' &&
+            creep.memory.room == Memory.nextRoom).length;
+        let countB = _.filter(Game.creeps, (creep) => creep.memory.role == 'rover' &&
+            creep.memory.room == Memory.followingRoom).length;
+        if (countA < Memory.requiredARovers) {
+            creep.memory.room = Memory.nextRoom;
+        }
+        else if (countB < Memory.requiredBRovers) {
+            creep.memory.room = Memory.followingRoom;
         }
     }
 };
