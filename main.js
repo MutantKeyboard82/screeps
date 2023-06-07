@@ -1,18 +1,25 @@
 require('prototype.creep');
+require('prototype.spawn');
 
 Memory.requiredAHarvesters = 1;
 Memory.requiredBHarvesters = 1;
-Memory.sourceA = 'e392d40b19ba2b5ebead1c24';
-Memory.sourceB = '68f33270b899461ab1881603';
+Memory.requiredCollectors = 1;
+Memory.sourceA = 'bd1cdc3054fb5100b6ef7940';
+Memory.sourceB = '853d3a55c3c42afa7cd73364';
 
 module.exports.loop = function () {
     console.log('********** Start tick ' + Game.time + ' **********');
+
+    let extensionCount = Game.spawns.Spawn1.countExtensions();
     
     let harvestersACount = _.filter(Game.creeps, (creep) => 
         creep.memory.role == 'harvester' && creep.memory.source == 'A').length;
 
     let harvestersBCount = _.filter(Game.creeps, (creep) => 
         creep.memory.role == 'harvester' && creep.memory.source == 'B').length;
+
+    let collectorCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'collector').length;
 
     if (harvestersACount < Memory.requiredAHarvesters) {
         Game.spawns['Spawn1'].spawnCreep( [WORK, WORK, MOVE],
@@ -25,12 +32,21 @@ module.exports.loop = function () {
             'harvester' + Game.time, {memory:{role:'harvester', source:'B'}} );
             console.log('Spawning B Harvester');
         }
+        else {
+            if (collectorCount < Memory.requiredCollectors) {
+                Game.spawns['Spawn1'].spawnCollector(extensionCount);
+            }
+        }
     }
 
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
         if (creep.memory.role == 'harvester') {
             creep.runHarvester();
+        }
+
+        if (creep.memory.role == 'collector') {
+            creep.runCollector();
         }
     }
     
