@@ -4,8 +4,8 @@ require('prototype.spawn');
 Memory.requiredAHarvesters = 1;
 Memory.requiredBHarvesters = 1;
 Memory.requiredCollectors = 1;
-Memory.sourceA = 'bd1cdc3054fb5100b6ef7940';
-Memory.sourceB = '853d3a55c3c42afa7cd73364';
+Memory.sourceA = '5982fdbab097071b4adbfc45';
+Memory.sourceB = '5982fdbab097071b4adbfc46';
 
 module.exports.loop = function () {
     console.log('********** Start tick ' + Game.time + ' **********');
