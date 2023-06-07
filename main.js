@@ -1,6 +1,6 @@
 require('prototype.creep');
 
-Memory.requiredHarvesters = 1;
+Memory.requiredHarvesters = 8;
 
 module.exports.loop = function () {
     console.log('********** Start tick ' + Game.time + ' **********');
