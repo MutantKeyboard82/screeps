@@ -14,14 +14,39 @@ Creep.prototype.runHarvester = function() {
 Creep.prototype.runCollector = function() {
     if (this.memory.status == 'collecting') {
         if (this.memory.targetID == 'none') {
+            Memory.droppedResources = this.room.find(FIND_DROPPED_RESOURCES);
+
+            Memory.test = _.max( Memory.droppedResources, function( resources ){ return resources.amount; });
+
             this.memory.targetID = _.max( Memory.droppedResources, function( resources ){ return resources.amount; }).id;
         }
         else {
             let target = Game.getObjectById(this.memory.targetID);
 
-            if (this.pickup(target) == ERR_NOT_IN_RANGE) {
+            let result = this.pickup(target);
+
+            if (result == ERR_NOT_IN_RANGE) {
                 this.moveTo(target);
             }
+
+            if (result == OK || result == ERR_FULL) {
+                this.memory.status = 'depositing';
+                this.memory.targetID = 'none';
+            }
+        }
+    }
+
+    if (this.memory.status == 'depositing') {
+        let target = Game.spawns['Spawn1'];
+
+        let result = this.transfer(target, RESOURCE_ENERGY);
+
+        if (result == ERR_NOT_IN_RANGE) {
+            this.moveTo(target);
+        }
+
+        if (result == ERR_NOT_ENOUGH_RESOURCES || result == OK) {
+            this.memory.status = 'collecting';
         }
     }
 };
