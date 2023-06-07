@@ -10,3 +10,10 @@ Creep.prototype.runHarvester = function() {
         this.moveTo(source);
     }
 }
+
+Creep.prototype.runUpgrader = function() {
+    if (this.memory.status == 'refilling') {
+        console.log('refilling');
+        Memory.droppedResources = this.room.find(FIND_DROPPED_RESOURCES);
+    }
+}
