@@ -18,6 +18,33 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
         creep.memory.role = 'collector';
 
         creep.memory.status = 'collecting';
+
+        creep.memory.targetID = 'none';
+    }
+};
+
+StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
+    let newName = 'builder' + Game.time;
+
+    console.log('Spawning: ' + newName);
+
+    /**
+     * @type {BodyPartConstant[]}
+     */
+    let parts;
+
+    if (extensionCount < 5) {
+        parts = this.setCreepParts(1,2,0,0,0,0,0,2)
+    }
+
+    if (this.spawnCreep(parts, newName) == OK) {
+        let creep = Game.creeps[newName];
+
+        creep.memory.role = 'builder';
+
+        creep.memory.status = 'stocking';
+
+        creep.memory.targetID = 'none';
     }
 };
 

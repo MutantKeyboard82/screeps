@@ -2,7 +2,7 @@ require('prototype.creep');
 require('prototype.spawn');
 
 Memory.requiredAHarvesters = 1;
-Memory.requiredBHarvesters = 0;
+Memory.requiredBHarvesters = 1;
 Memory.requiredCollectors = 1;
 Memory.requiredBuilders = 1;
 Memory.sourceA = 'e1abc790799a518baba76adc';
@@ -25,7 +25,7 @@ module.exports.loop = function () {
     let builderCount = _.filter(Game.creeps, (creep) =>
         creep.memory.role == 'builder').length;
 
-    let constructionSitesCount = _.filter
+    let constructionSites = _.filter(Game.constructionSites);
 
     if (harvestersACount < Memory.requiredAHarvesters) {
         Game.spawns['Spawn1'].spawnCreep( [WORK, WORK, MOVE],
@@ -42,6 +42,11 @@ module.exports.loop = function () {
             if (collectorCount < Memory.requiredCollectors) {
                 Game.spawns['Spawn1'].spawnCollector(extensionCount);
             }
+            else {
+                if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
+                    Game.spawns['Spawn1'].spawnBuilder(extensionCount);
+                }
+            }
         }
     }
 
@@ -53,6 +58,10 @@ module.exports.loop = function () {
 
         if (creep.memory.role == 'collector') {
             creep.runCollector();
+        }
+
+        if (creep.memory.role == 'builder') {
+            creep.runBuilder();
         }
     }
     
