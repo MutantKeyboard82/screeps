@@ -4,7 +4,7 @@ require('prototype.spawn');
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
-Memory.requiredBuilders = 10;
+Memory.requiredBuilders = 9;
 Memory.requiredUpgraders = 1;
 Memory.sourceA = 'b9f5e4a37b57eb73dbfd2ead';
 Memory.sourceB = '3b5174f2367cae226285bdfc';
