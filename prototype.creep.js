@@ -26,7 +26,23 @@ Creep.prototype.runCollector = function() {
     }
 
     if (this.memory.status == 'depositing') {
-        let target = Game.spawns['Spawn1'];
+        let extensions = this.room.find(FIND_MY_STRUCTURES, {
+            filter: {structureType: STRUCTURE_EXTENSION}
+            });
+
+        let target;
+
+        if (extensions.length > 0) {
+            target = _.max(extensions, function( extension )
+                { return extension.store.getFreeCapacity(RESOURCE_ENERGY); });
+            
+            if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                target = Game.spawns['Spawn1'];
+            }
+        }
+        else {
+            target = Game.spawns['Spawn1'];
+        }
 
         let result = this.transfer(target, RESOURCE_ENERGY);
 
@@ -34,7 +50,7 @@ Creep.prototype.runCollector = function() {
             this.moveTo(target);
         }
 
-        if (result == ERR_NOT_ENOUGH_RESOURCES || result == OK) {
+        if (result == ERR_NOT_ENOUGH_RESOURCES || (result == OK && this.store.getUsedCapacity() == 0)) {
             this.memory.status = 'collecting';
         }
     }

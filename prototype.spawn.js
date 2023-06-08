@@ -1,3 +1,27 @@
+StructureSpawn.prototype.spawnHarvester = function(extensionCount, source) {
+    let newName = 'harvester' + Game.time;
+
+    console.log('Spawning: ' + newName);
+
+    let parts;
+
+    if (extensionCount < 5) {
+        parts = this.setCreepParts(2,0,0,0,0,0,0,2);
+    }
+
+    if (extensionCount < 10) {
+        parts = this.setCreepParts(5,0,0,0,0,0,0,1);
+    }
+
+    if (this.spawnCreep(parts, newName) == OK) {
+        let creep = Game.creeps[newName];
+
+        creep.memory.role = 'harvester';
+
+        creep.memory.source = source;
+    }
+};
+
 StructureSpawn.prototype.spawnCollector = function(extensionCount) {
     let newName = 'collector' + Game.time;
 
@@ -10,6 +34,10 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
 
     if (extensionCount < 5) {
         parts = this.setCreepParts(0,4,0,0,0,0,0,2);
+    }
+
+    if (extensionCount < 10) {
+        parts = this.setCreepParts(0,7,0,0,0,0,0,4);
     }
     
     if (this.spawnCreep(parts, newName) == OK) {
@@ -34,7 +62,11 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
     let parts;
 
     if (extensionCount < 5) {
-        parts = this.setCreepParts(1,2,0,0,0,0,0,2)
+        parts = this.setCreepParts(1,2,0,0,0,0,0,2);
+    }
+
+    if (extensionsCount < 10) {
+        parts = this.setCreepParts(2,4,0,0,0,0,0,3);
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
@@ -59,7 +91,11 @@ StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
     let parts;
 
     if (extensionCount < 5) {
-        parts = this.setCreepParts(1,2,0,0,0,0,0,2)
+        parts = this.setCreepParts(1,2,0,0,0,0,0,2);
+    }
+
+    if (extensionCount < 10) {
+        parts = this.setCreepParts(2,4,0,0,0,0,0,3);
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
