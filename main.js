@@ -1,13 +1,16 @@
 require('prototype.creep');
 require('prototype.spawn');
+require('prototype.tower');
 
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
 Memory.requiredBuilders = 1;
 Memory.requiredUpgraders = 1;
-Memory.sourceA = 'b9f5e4a37b57eb73dbfd2ead';
-Memory.sourceB = '3b5174f2367cae226285bdfc';
+Memory.sourceA = '6adc3bacd96b4f41eb91d02d';
+Memory.sourceB = 'af85970a63e066a0c3526f24';
+Memory.damageThreshold = 2000;
+Memory.structuresToRepair = [];
 
 module.exports.loop = function () {
     console.log('********** Start tick ' + Game.time + ' **********');
@@ -24,6 +27,28 @@ module.exports.loop = function () {
         Memory.requiredAHarvesters = 1;
 
         Memory.requiredBHarvesters = 1;
+    }
+
+    let myRooms = _.filter(Game.rooms);
+
+    let myTowers = [];
+
+    myRooms.forEach(room => CheckRepairs(room));
+
+    myRooms.forEach(room => FindMyTowers(room));
+
+    if (Memory.structuresToRepair.length > 100) {
+        console.log('Reducing Threshold');
+
+        Memory.damageThreshold = Memory.damageThreshold - 100;
+    }
+
+    if (Memory.structuresToRepair.length == 0) {
+        console.log('Increasing Threshold');
+
+        if (Memory.damageThreshold < 300000000) {
+            Memory.damageThreshold = Memory.damageThreshold + 1000; 
+        }
     }
     
     let harvestersACount = _.filter(Game.creeps, (creep) => 
@@ -87,6 +112,8 @@ module.exports.loop = function () {
             creep.runUpgrader();
         }
     }
+
+    myTowers.forEach(tower => tower.defendRoom())
     
     for(var i in Memory.creeps) {
         if(!Game.creeps[i]) {
@@ -95,4 +122,25 @@ module.exports.loop = function () {
     }
 
     console.log('********** End tick **********');
+
+    function CheckRepairs(room) {
+        let targets = room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.hits < structure.hitsMax &&
+                    structure.hits < Memory.damageThreshold);
+            }
+        });
+        targets.forEach(target => Memory.structuresToRepair.push(target));
+
+        console.log('Repairing: ' + Memory.structuresToRepair.length);
+    };
+
+    function FindMyTowers(room) {
+        let roomTowers = Game.rooms[room.name].find(FIND_MY_STRUCTURES, {
+            filter: {
+                structureType: STRUCTURE_TOWER
+            }
+        });
+        roomTowers.forEach(tower => myTowers.push(tower));
+    };
 }
