@@ -40,7 +40,14 @@ Creep.prototype.runCollector = function() {
     }
 };
 
-Creep.prototype.runBuilder = function() {
+Creep.prototype.runBuilder = function(constructionSites) {
+    console.log(constructionSites);
+
+    if (constructionSites.length == 0)
+    {
+        this.suicide();
+    }
+
     if (this.memory.status == 'stocking') {
         if (this.memory.targetID == 'none') {
             this.findBestResources();
