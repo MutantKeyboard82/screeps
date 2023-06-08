@@ -61,7 +61,7 @@ module.exports.loop = function () {
         }
 
         if (creep.memory.role == 'builder') {
-            creep.runBuilder();
+            creep.runBuilder(constructionSites);
         }
     }
     
