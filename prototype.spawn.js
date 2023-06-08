@@ -48,6 +48,31 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
     }
 };
 
+StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
+    let newName = 'upgrader' + Game.time;
+
+    console.log('Spawning: ' + newName);
+
+    /**
+     * @type {BodyPartConstant[]}
+     */
+    let parts;
+
+    if (extensionCount < 5) {
+        parts = this.setCreepParts(1,2,0,0,0,0,0,2)
+    }
+
+    if (this.spawnCreep(parts, newName) == OK) {
+        let creep = Game.creeps[newName];
+
+        creep.memory.role = 'upgrader';
+
+        creep.memory.status = 'stocking';
+
+        creep.memory.targetID = 'none';
+    }
+};
+
 StructureSpawn.prototype.countExtensions = function() {
     var extensions = this.room.find(FIND_STRUCTURES, {
         filter: (structure) => {

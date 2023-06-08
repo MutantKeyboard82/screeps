@@ -41,8 +41,6 @@ Creep.prototype.runCollector = function() {
 };
 
 Creep.prototype.runBuilder = function(constructionSites) {
-    console.log(constructionSites);
-
     if (constructionSites.length == 0)
     {
         this.suicide();
@@ -82,6 +80,36 @@ Creep.prototype.runBuilder = function(constructionSites) {
             if (result == OK || result == ERR_INVALID_TARGET) {
                 this.memory.targetID ='none';
             }
+        }
+    }
+};
+
+Creep.prototype.runUpgrader = function() {
+    if (this.memory.status == 'stocking') {
+        if (this.memory.targetID == 'none') {
+            this.findBestResources();
+        }
+        else {
+            let result = this.collectResources();
+
+            if (result == OK) {
+                this.memory.status = 'upgrading';
+            }
+        }
+    }
+    else {
+        let controller = this.room.controller;
+
+        let result = this.upgradeController(controller);
+        
+        if (result == ERR_NOT_IN_RANGE) {
+            this.moveTo(controller);
+        }
+
+        if (result == ERR_NOT_ENOUGH_RESOURCES) {
+            this.memory.status = 'stocking';
+
+            this.memory.targetID = 'none';
         }
     }
 };

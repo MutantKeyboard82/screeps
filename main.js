@@ -4,7 +4,8 @@ require('prototype.spawn');
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
-Memory.requiredBuilders = 5;
+Memory.requiredBuilders = 10;
+Memory.requiredUpgraders = 1;
 Memory.sourceA = 'b9f5e4a37b57eb73dbfd2ead';
 Memory.sourceB = '3b5174f2367cae226285bdfc';
 
@@ -27,6 +28,9 @@ module.exports.loop = function () {
 
     let constructionSites = _.filter(Game.constructionSites);
 
+    let upgraderCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'upgrader').length;
+
     if (collectorCount < Memory.requiredCollectors) {
         Game.spawns['Spawn1'].spawnCollector(extensionCount);
     }
@@ -46,6 +50,11 @@ module.exports.loop = function () {
                 if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
                     Game.spawns['Spawn1'].spawnBuilder(extensionCount);
                 }
+                else {
+                    if (upgraderCount < Memory.requiredUpgraders) {
+                        Game.spawns['Spawn1'].spawnUpgrader(extensionCount);
+                    }
+                }
             }
         }
     }
@@ -62,6 +71,10 @@ module.exports.loop = function () {
 
         if (creep.memory.role == 'builder') {
             creep.runBuilder(constructionSites);
+        }
+
+        if (creep.memory.role == 'upgrader') {
+            creep.runUpgrader();
         }
     }
     
