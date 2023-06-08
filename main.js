@@ -1,12 +1,12 @@
 require('prototype.creep');
 require('prototype.spawn');
 
-Memory.requiredAHarvesters = 1;
-Memory.requiredBHarvesters = 1;
+Memory.requiredAHarvesters = 2;
+Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
-Memory.requiredBuilders = 1;
-Memory.sourceA = 'e1abc790799a518baba76adc';
-Memory.sourceB = '254de373aca5691ab677068a';
+Memory.requiredBuilders = 5;
+Memory.sourceA = 'b9f5e4a37b57eb73dbfd2ead';
+Memory.sourceB = '3b5174f2367cae226285bdfc';
 
 module.exports.loop = function () {
     console.log('********** Start tick ' + Game.time + ' **********');
@@ -27,21 +27,21 @@ module.exports.loop = function () {
 
     let constructionSites = _.filter(Game.constructionSites);
 
-    if (harvestersACount < Memory.requiredAHarvesters) {
-        Game.spawns['Spawn1'].spawnCreep( [WORK, WORK, MOVE],
-        'harvester' + Game.time, {memory:{role:'harvester', source:'A'}} );
-        console.log('Spawning A Harvester');
+    if (collectorCount < Memory.requiredCollectors) {
+        Game.spawns['Spawn1'].spawnCollector(extensionCount);
     }
     else {
-        if (harvestersBCount < Memory.requiredBHarvesters) {
-            Game.spawns['Spawn1'].spawnCreep( [WORK, WORK, MOVE], 
-            'harvester' + Game.time, {memory:{role:'harvester', source:'B'}} );
-            console.log('Spawning B Harvester');
+        if (harvestersACount < Memory.requiredAHarvesters) {
+            Game.spawns['Spawn1'].spawnCreep( [WORK, WORK, MOVE],
+            'harvester' + Game.time, {memory:{role:'harvester', source:'A'}} );
+            console.log('Spawning A Harvester');
         }
         else {
-            if (collectorCount < Memory.requiredCollectors) {
-                Game.spawns['Spawn1'].spawnCollector(extensionCount);
-            }
+            if (harvestersBCount < Memory.requiredBHarvesters) {
+                Game.spawns['Spawn1'].spawnCreep( [WORK, WORK, MOVE], 
+                'harvester' + Game.time, {memory:{role:'harvester', source:'B'}} );
+                console.log('Spawning B Harvester');
+            }   
             else {
                 if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
                     Game.spawns['Spawn1'].spawnBuilder(extensionCount);

@@ -72,7 +72,7 @@ Creep.prototype.runBuilder = function() {
                 this.memory.targetID = 'none';
             }
 
-            if (result == OK) {
+            if (result == OK || result == ERR_INVALID_TARGET) {
                 this.memory.targetID ='none';
             }
         }
@@ -96,7 +96,7 @@ Creep.prototype.collectResources = function() {
                 return ERR_NOT_IN_RANGE
             }
 
-            if (result == OK || result == ERR_FULL) {
+            if (result == OK || result == ERR_FULL || ERR_INVALID_TARGET) {
                 this.memory.targetID = 'none';
 
                 return OK;
