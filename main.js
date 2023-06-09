@@ -7,8 +7,8 @@ Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
 Memory.requiredBuilders = 1;
 Memory.requiredUpgraders = 1;
-Memory.sourceA = '6adc3bacd96b4f41eb91d02d';
-Memory.sourceB = 'af85970a63e066a0c3526f24';
+Memory.sourceA = 'a0852f21014eef969de1a29e';
+Memory.sourceB = 'f08845b29e943f54f0455752';
 Memory.damageThreshold = 2000;
 Memory.structuresToRepair = [];
 

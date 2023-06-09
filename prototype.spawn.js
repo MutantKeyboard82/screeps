@@ -65,7 +65,7 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
         parts = this.setCreepParts(1,2,0,0,0,0,0,2);
     }
 
-    if (extensionsCount >= 5 && extensionCount <= 9) {
+    if (extensionCount >= 5 && extensionCount <= 9) {
         parts = this.setCreepParts(2,4,0,0,0,0,0,3);
     }
 
