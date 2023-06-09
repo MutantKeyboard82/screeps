@@ -5,11 +5,11 @@ StructureSpawn.prototype.spawnHarvester = function(extensionCount, source) {
 
     let parts;
 
-    if (extensionCount < 5) {
+    if (extensionCount >= 0 && extensionCount <= 4) {
         parts = this.setCreepParts(2,0,0,0,0,0,0,2);
     }
 
-    if (extensionCount < 10) {
+    if (extensionCount >= 5 && extensionCount <=9) {
         parts = this.setCreepParts(5,0,0,0,0,0,0,1);
     }
 
@@ -32,14 +32,14 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
      */
     let parts;
 
-    if (extensionCount < 5) {
+    if (extensionCount >= 0 && extensionCount <= 4) {
         parts = this.setCreepParts(0,4,0,0,0,0,0,2);
     }
 
-    if (extensionCount < 10) {
+    if (extensionCount >= 5 && extensionCount <= 9) {
         parts = this.setCreepParts(0,7,0,0,0,0,0,4);
     }
-    
+
     if (this.spawnCreep(parts, newName) == OK) {
         let creep = Game.creeps[newName];
 
@@ -61,11 +61,11 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
      */
     let parts;
 
-    if (extensionCount < 5) {
+    if (extensionCount >= 0 && extensionCount <= 4) {
         parts = this.setCreepParts(1,2,0,0,0,0,0,2);
     }
 
-    if (extensionsCount < 10) {
+    if (extensionCount >= 5 && extensionCount <= 9) {
         parts = this.setCreepParts(2,4,0,0,0,0,0,3);
     }
 
@@ -90,11 +90,11 @@ StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
      */
     let parts;
 
-    if (extensionCount < 5) {
+    if (extensionCount >= 0 && extensionCount <= 4) {
         parts = this.setCreepParts(1,2,0,0,0,0,0,2);
     }
 
-    if (extensionCount < 10) {
+    if (extensionCount >= 5 && extensionCount <= 9) {
         parts = this.setCreepParts(2,4,0,0,0,0,0,3);
     }
 
