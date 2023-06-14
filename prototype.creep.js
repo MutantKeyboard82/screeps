@@ -21,7 +21,7 @@ Creep.prototype.runCollector = function() {
 
             if (result == OK) {
                 this.memory.status = 'depositing';
-                console.log('Here6');
+
                 this.memory.target = 'extensions';
             }
         }
@@ -31,46 +31,37 @@ Creep.prototype.runCollector = function() {
         let target;
 
         if (this.memory.target == 'extensions') {
-            console.log('Here4');
             let extensions = this.room.find(FIND_MY_STRUCTURES, {
                 filter: {structureType: STRUCTURE_EXTENSION}
                 });
 
             if (extensions.length > 0) {    
-                console.log('Here7');
                 target = _.max(extensions, function( extension )
                     { return extension.store.getFreeCapacity(RESOURCE_ENERGY); });
-                console.log('Here8');
-                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
-                    console.log('Here2');
-                    
+
+                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {                    
                     this.memory.target = 'spawn';
                 }
                 else {
-                    console.log('Here9');
                     let result = this.transfer(target, RESOURCE_ENERGY);
+
                     console.log('Extension deposit: ' + result);
 
                     if (result == ERR_NOT_IN_RANGE) {
-                        console.log('Here10');
                         this.moveTo(target);
                     }
 
                     if (result == ERR_NOT_ENOUGH_RESOURCES) {
-                        console.log('Here11');
                         this.memory.status = 'collecting';
                     }
                 }
             }
             else {
-                console.log('Here3');
-
                 this.memory.target = 'spawn';
             }
         }
 
         if (this.memory.target == 'spawn') {
-            console.log('Here5');
             if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) == 0)
             {
                 this.memory.target = 'towers';
