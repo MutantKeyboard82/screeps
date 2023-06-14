@@ -6,9 +6,11 @@ Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
 Memory.requiredBuilders = 1;
-Memory.requiredUpgraders = 1;
+Memory.requiredUpgraders = 2;
 Memory.sourceA = '97ff20d2ffab896107cd4095';
+Memory.containerA = '291b5b24a0a1f16c9047718f';
 Memory.sourceB = '51d6b28e76d8c33c9832de4b';
+Memory.containerB = 'b73c6100c9389349c577d5bf';
 Memory.damageThreshold = 2000;
 Memory.structuresToRepair = [];
 
@@ -22,8 +24,7 @@ module.exports.loop = function () {
 
         Memory.requiredBHarvesters = 2;
     }
-
-    if (extensionCount < 10) {
+    else {
         Memory.requiredAHarvesters = 1;
 
         Memory.requiredBHarvesters = 1;
@@ -37,19 +38,21 @@ module.exports.loop = function () {
 
     myRooms.forEach(room => FindMyTowers(room));
 
-    if (Memory.structuresToRepair.length > 100) {
-        console.log('Reducing Threshold');
+    console.log('Damage Threshold Start: ' + Memory.damageThreshold);
 
+    console.log('Structures to repair: ' + Memory.structuresToRepair.length);
+
+    if (Memory.structuresToRepair.length > 100) {
         Memory.damageThreshold = Memory.damageThreshold - 100;
     }
 
     if (Memory.structuresToRepair.length == 0) {
-        console.log('Increasing Threshold');
-
         if (Memory.damageThreshold < 300000000) {
             Memory.damageThreshold = Memory.damageThreshold + 1000; 
         }
     }
+
+    console.log('Damage Threshold End: ' + Memory.damageThreshold);
     
     let harvestersACount = _.filter(Game.creeps, (creep) => 
         creep.memory.role == 'harvester' && creep.memory.source == 'A').length;
@@ -131,8 +134,6 @@ module.exports.loop = function () {
             }
         });
         targets.forEach(target => Memory.structuresToRepair.push(target));
-
-        console.log('Repairing: ' + Memory.structuresToRepair.length);
     };
 
     function FindMyTowers(room) {

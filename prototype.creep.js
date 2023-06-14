@@ -1,13 +1,28 @@
 Creep.prototype.runHarvester = function() {
     let source;
+    let container;
     if (this.memory.source == 'A') {
         source = Game.getObjectById(Memory.sourceA);
+
+        container = Game.getObjectById(Memory.containerA);
     }
     else {
         source = Game.getObjectById(Memory.sourceB);
+
+        container = Game.getObjectById(Memory.containerB);
     }
-    if(this.harvest(source) == ERR_NOT_IN_RANGE) {
-        this.moveTo(source);
+    if (container != null) {
+        if (this.pos.isEqualTo(container)) {
+            this.harvest(source);
+        }
+        else {
+            this.moveTo(container);
+        }
+    }
+    else {
+        if(this.harvest(source) == ERR_NOT_IN_RANGE) {
+            this.moveTo(source);
+        }
     }
 };
 
@@ -43,9 +58,7 @@ Creep.prototype.runCollector = function() {
                     this.memory.target = 'spawn';
                 }
                 else {
-                    let result = this.transfer(target, RESOURCE_ENERGY);
-
-                    console.log('Extension deposit: ' + result);
+                    let result = this.transfer(target, RESOURCE_ENERGY);                    
 
                     if (result == ERR_NOT_IN_RANGE) {
                         this.moveTo(target);
@@ -193,25 +206,45 @@ Creep.prototype.runUpgrader = function() {
 };
 
 Creep.prototype.findBestResources = function() {
-    Memory.droppedResources = this.room.find(FIND_DROPPED_RESOURCES);
+    let containers = this.room.find(FIND_STRUCTURES, {
+        filter: {structureType: STRUCTURE_CONTAINER }
+    });
 
-    this.memory.targetID = _.max( Memory.droppedResources, function( resources ){ return resources.amount; }).id;
+    if (containers.length > 0) {
+        this.memory.targetID = _.max( containers, function( container ) {
+            return container.store.getUsedCapacity();
+        }).id;
+
+        this.memory.target = 'container';
+    }
+    else {
+        Memory.droppedResources = this.room.find(FIND_DROPPED_RESOURCES);
+
+        this.memory.targetID = _.max( Memory.droppedResources, function( resources ){ return resources.amount; }).id;
+    }
 };
 
 Creep.prototype.collectResources = function() {
     let target = Game.getObjectById(this.memory.targetID);
 
-            let result = this.pickup(target);
+    let result;
 
-            if (result == ERR_NOT_IN_RANGE) {
-                this.moveTo(target);
+    if (this.memory.target == 'container') {
+        result = this.withdraw(target, RESOURCE_ENERGY);
+    }
+    else {
+        result = this.pickup(target);
+    }
 
-                return ERR_NOT_IN_RANGE
-            }
+    if (result == ERR_NOT_IN_RANGE) {
+        this.moveTo(target);
 
-            if (result == OK || result == ERR_FULL || ERR_INVALID_TARGET) {
-                this.memory.targetID = 'none';
+        return ERR_NOT_IN_RANGE
+    }
 
-                return OK;
-            }
+    if (result == OK || result == ERR_FULL || ERR_INVALID_TARGET) {
+        this.memory.targetID = 'none';
+
+        return OK;
+    }
 };
