@@ -111,21 +111,24 @@ Creep.prototype.runCollector = function() {
             if (towers.length > 0) {    
                 target = _.max(towers, function( tower )
                     { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
-            }
 
-            if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
-                this.memory.target = 'extensions';
+                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                    this.memory.target = 'extensions';
+                }
+                else {
+                    let result = this.transfer(target, RESOURCE_ENERGY);
+    
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
+                    }
+            
+                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                        this.memory.status = 'collecting';
+                    }
+                }
             }
             else {
-                let result = this.transfer(target, RESOURCE_ENERGY);
-
-                if (result == ERR_NOT_IN_RANGE) {
-                    this.moveTo(target);
-                }
-        
-                if (result == ERR_NOT_ENOUGH_RESOURCES) {
-                    this.memory.status = 'collecting';
-                }
+                this.memory.target = 'extensions';
             }
         }
     }
