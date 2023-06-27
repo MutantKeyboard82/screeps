@@ -111,21 +111,51 @@ Creep.prototype.runCollector = function() {
             if (towers.length > 0) {    
                 target = _.max(towers, function( tower )
                     { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
-            }
 
-            if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
-                this.memory.target = 'extensions';
+                    if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                        this.memory.target = 'storage';
+                    }
+                    else {
+                        let result = this.transfer(target, RESOURCE_ENERGY);
+        
+                        if (result == ERR_NOT_IN_RANGE) {
+                            this.moveTo(target);
+                        }
+                
+                        if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                            this.memory.status = 'collecting';
+                        }
+                    }
             }
             else {
-                let result = this.transfer(target, RESOURCE_ENERGY);
+                this.memory.target = 'storage';
+            }
+        }
 
-                if (result == ERR_NOT_IN_RANGE) {
-                    this.moveTo(target);
+        if (this.memory.target == 'storage') {
+            if (this.room.storage != null){
+                let storage = this.room.storage;
+
+                console.log('Storage: ' + storage);
+
+                console.log(storage.store.getFreeCapacity());
+
+                if (storage.store.getFreeCapacity() > 0) {
+                    let result = this.transfer(storage, RESOURCE_ENERGY);
+
+                    console.log('Result: ' + result);
+
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
+                    }
+            
+                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                        this.memory.status = 'collecting';
+                    }
                 }
-        
-                if (result == ERR_NOT_ENOUGH_RESOURCES) {
-                    this.memory.status = 'collecting';
-                }
+            }
+            else {
+                this.memory.target = 'extensions';
             }
         }
     }
