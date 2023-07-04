@@ -40,7 +40,7 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
         parts = this.setCreepParts(0,7,0,0,0,0,0,4);
     }
 
-    if (extensionCount >= 10 && extensionCount <= 14) {
+    if (extensionCount >= 10 && extensionCount <= 99) {
         parts = this.setCreepParts(0,10,0,0,0,0,0,5);
     }
 
@@ -73,7 +73,7 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
         parts = this.setCreepParts(2,4,0,0,0,0,0,3);
     }
 
-    if (extensionCount >= 10 && extensionCount <= 14) {
+    if (extensionCount >= 10 && extensionCount <= 99) {
         parts = this.setCreepParts(3,5,0,0,0,0,0,4);
     }
 
@@ -106,7 +106,7 @@ StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
         parts = this.setCreepParts(2,4,0,0,0,0,0,3);
     }
 
-    if (extensionCount >= 10 && extensionCount <= 14) {
+    if (extensionCount >= 10 && extensionCount <= 99) {
         parts = this.setCreepParts(3,5,0,0,0,0,0,4);
     }
 
