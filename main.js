@@ -5,7 +5,7 @@ require('prototype.tower');
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
-Memory.requiredBuilders = 6;
+Memory.requiredBuilders = 1;
 Memory.requiredUpgraders = 1;
 Memory.sourceA = '59830048b097071b4adc4070';
 Memory.containerA = '291b5b24a0a1f16c9047718f';
@@ -13,6 +13,7 @@ Memory.sourceB = '59830048b097071b4adc406f';
 Memory.containerB = 'b73c6100c9389349c577d5bf';
 Memory.damageThreshold = 2000;
 Memory.structuresToRepair = [];
+Memory.collectorTTL = 201;
 
 module.exports.loop = function () {
     console.log('********** Start tick ' + Game.time + ' **********');
@@ -42,7 +43,7 @@ module.exports.loop = function () {
 
     console.log('Structures to repair: ' + Memory.structuresToRepair.length);
 
-    if (Memory.structuresToRepair.length > 100) {
+    if (Memory.structuresToRepair.length > 100 && Memory.damageThreshold >= 0) {
         Memory.damageThreshold = Memory.damageThreshold - 100;
     }
 
@@ -71,7 +72,7 @@ module.exports.loop = function () {
     let upgraderCount = _.filter(Game.creeps, (creep) =>
         creep.memory.role == 'upgrader').length;
 
-    if (collectorCount < Memory.requiredCollectors) {
+    if (collectorCount < Memory.requiredCollectors || Memory.collectorTTL < 200) {
         Game.spawns['Spawn1'].spawnCollector(extensionCount);
     }
     else {
@@ -104,6 +105,7 @@ module.exports.loop = function () {
         }
 
         if (creep.memory.role == 'collector') {
+
             creep.runCollector();
         }
 
@@ -127,6 +129,8 @@ module.exports.loop = function () {
     console.log('********** End tick **********');
 
     function CheckRepairs(room) {
+        Memory.structuresToRepair = [];
+        
         let targets = room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax &&

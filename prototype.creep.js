@@ -27,6 +27,8 @@ Creep.prototype.runHarvester = function() {
 };
 
 Creep.prototype.runCollector = function() {
+    Memory.collectorTTL = this.ticksToLive
+
     if (this.memory.status == 'collecting') {
         if (this.memory.targetID == 'none') {
             this.findBestResources();
@@ -112,7 +114,7 @@ Creep.prototype.runCollector = function() {
                 target = _.max(towers, function( tower )
                     { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
 
-                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                if (target.store.getFreeCapacity(RESOURCE_ENERGY) < 20) {
                     this.memory.target = 'extensions';
                 }
                 else {
