@@ -27,7 +27,7 @@ Creep.prototype.runHarvester = function() {
 };
 
 Creep.prototype.runCollector = function() {
-    Memory.collectorTTL = this.ticksToLive
+    Memory.collectorTTL = this.ticksToLive;
 
     if (this.memory.status == 'collecting') {
         if (this.memory.targetID == 'none') {
@@ -239,10 +239,12 @@ Creep.prototype.runUpgrader = function() {
 };
 
 Creep.prototype.findBestResources = function() {
-    if (this.memory.role != 'collector' && this.room.storage != null) {
-        this.memory.target = 'storage';
+    if ((this.memory.role != 'collector' && this.room.storage != null) ||
+        (this.memory.role == 'collector' && this.room.energyAvailable != this.room.energyCapacityAvailable &&
+        this.room.storage != null && this.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 0)) {
+            this.memory.target = 'storage';
 
-        this.memory.targetID = this.room.storage.id;
+            this.memory.targetID = this.room.storage.id;
     }
     else {
         let containers = this.room.find(FIND_STRUCTURES, {

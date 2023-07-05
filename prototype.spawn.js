@@ -45,7 +45,7 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
     }
 
     if (extensionCount >= 20 && extensionCount <= 99) {
-        parts = this.setCreepParts(0,17,0,0,0,0,0,9);
+        parts = this.setCreepParts(0,16,0,0,0,0,0,8);
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
