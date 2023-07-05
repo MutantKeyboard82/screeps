@@ -115,7 +115,7 @@ Creep.prototype.runCollector = function() {
                     { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
 
                 if (target.store.getFreeCapacity(RESOURCE_ENERGY) < 20) {
-                    this.memory.target = 'extensions';
+                    this.memory.target = 'storage';
                 }
                 else {
                     let result = this.transfer(target, RESOURCE_ENERGY);
@@ -125,6 +125,34 @@ Creep.prototype.runCollector = function() {
                     }
             
                     if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                        this.memory.status = 'collecting';
+                    }
+                }
+            }
+            else {
+                this.memory.target = 'storage';
+            }
+        }
+
+        if (this.memory.target == 'storage') {
+            if (this.room.storage != null) {
+                target = this.room.storage;
+
+                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                    this.memory.target = 'extensions';
+                }
+                else {
+                    let result = this.transfer(target, RESOURCE_ENERGY);
+
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
+                    }
+
+                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                        this.memory.status = 'collecting';
+                    }
+
+                    if (result == OK) {
                         this.memory.status = 'collecting';
                     }
                 }
@@ -211,21 +239,28 @@ Creep.prototype.runUpgrader = function() {
 };
 
 Creep.prototype.findBestResources = function() {
-    let containers = this.room.find(FIND_STRUCTURES, {
-        filter: {structureType: STRUCTURE_CONTAINER }
-    });
+    if (this.memory.role != 'collector' && this.room.storage != null) {
+        this.memory.target = 'storage';
 
-    if (containers.length > 0) {
-        this.memory.targetID = _.max( containers, function( container ) {
-            return container.store.getUsedCapacity();
-        }).id;
-
-        this.memory.target = 'container';
+        this.memory.targetID = this.room.storage.id;
     }
     else {
-        Memory.droppedResources = this.room.find(FIND_DROPPED_RESOURCES);
+        let containers = this.room.find(FIND_STRUCTURES, {
+            filter: {structureType: STRUCTURE_CONTAINER }
+        });
 
-        this.memory.targetID = _.max( Memory.droppedResources, function( resources ){ return resources.amount; }).id;
+        if (containers.length > 0) {
+            this.memory.targetID = _.max( containers, function( container ) {
+                return container.store.getUsedCapacity();
+            }).id;
+
+            this.memory.target = 'container';
+        }
+        else {
+            Memory.droppedResources = this.room.find(FIND_DROPPED_RESOURCES);
+
+            this.memory.targetID = _.max( Memory.droppedResources, function( resources ){ return resources.amount; }).id;
+        }
     }
 };
 
@@ -234,7 +269,7 @@ Creep.prototype.collectResources = function() {
 
     let result;
 
-    if (this.memory.target == 'container') {
+    if (this.memory.target == 'container' || this.memory.target == 'storage') {
         result = this.withdraw(target, RESOURCE_ENERGY);
     }
     else {
