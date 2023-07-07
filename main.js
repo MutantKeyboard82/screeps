@@ -6,7 +6,7 @@ Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
 Memory.requiredBuilders = 1;
-Memory.requiredUpgraders = 2;
+Memory.requiredUpgraders = 3;
 Memory.sourceA = '59830048b097071b4adc4070';
 Memory.containerA = '291b5b24a0a1f16c9047718f';
 Memory.sourceB = '59830048b097071b4adc406f';
@@ -31,7 +31,7 @@ module.exports.loop = function () {
         Memory.requiredBHarvesters = 1;
     }
 
-    if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) < 7000) {
+    if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) < 9000) {
         Memory.requiredUpgraders = 1;
     }
 
