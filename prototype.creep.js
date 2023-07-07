@@ -222,18 +222,48 @@ Creep.prototype.runUpgrader = function() {
         }
     }
     else {
-        let controller = this.room.controller;
+        if (this.memory.group == 'A') {
+            let controller = this.room.controller;
 
-        let result = this.upgradeController(controller);
-        
-        if (result == ERR_NOT_IN_RANGE) {
-            this.moveTo(controller);
+            let result = this.upgradeController(controller);
+            
+            if (result == ERR_NOT_IN_RANGE) {
+                this.moveTo(controller);
+            }
+
+            if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                this.memory.status = 'stocking';
+
+                this.memory.targetID = 'none';
+            }
         }
 
-        if (result == ERR_NOT_ENOUGH_RESOURCES) {
-            this.memory.status = 'stocking';
+        if (this.memory.group == 'B') {
+            let controller = Game.getObjectById(Memory.controllerB);
 
-            this.memory.targetID = 'none';
+            console.log(Memory.controllerB);
+            
+            console.log(controller);
+
+            let result = this.upgradeController(controller);
+
+            console.log(result);
+            
+            if (result == ERR_NOT_IN_RANGE) {
+                this.moveTo(controller);
+            }
+
+            if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                this.memory.status = 'stocking';
+
+                this.memory.targetID = 'none';
+            }
+
+            if (result == ERR_NOT_OWNER) {
+                this.claimController(controller);
+
+                this.signController(controller, 'This room is under the control of The Hidden Guild - https://discord.gg/WRDG6Sy');
+            }
         }
     }
 };

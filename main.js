@@ -6,11 +6,13 @@ Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
 Memory.requiredBuilders = 1;
-Memory.requiredUpgraders = 3;
+Memory.requiredUpgraders = 1;
+Memory.requiredBUpgraders = 1;
 Memory.sourceA = '59830048b097071b4adc4070';
 Memory.containerA = '291b5b24a0a1f16c9047718f';
 Memory.sourceB = '59830048b097071b4adc406f';
 Memory.containerB = 'b73c6100c9389349c577d5bf';
+Memory.controllerB = '59830048b097071b4adc406b';
 Memory.damageThreshold = 2000;
 Memory.structuresToRepair = [];
 Memory.collectorTTL = 201;
@@ -73,8 +75,11 @@ module.exports.loop = function () {
 
     let constructionSites = _.filter(Game.constructionSites);
 
-    let upgraderCount = _.filter(Game.creeps, (creep) =>
-        creep.memory.role == 'upgrader').length;
+    let upgraderACount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'upgrader' && creep.memory.group == 'A').length;
+
+    let upgraderBCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'upgrader' && creep.memory.group == 'B').length;
 
     if (collectorCount < Memory.requiredCollectors || Memory.collectorTTL < 200) {
         Game.spawns['Spawn1'].spawnCollector(extensionCount);
@@ -94,8 +99,13 @@ module.exports.loop = function () {
                     Game.spawns['Spawn1'].spawnBuilder(extensionCount);
                 }
                 else {
-                    if (upgraderCount < Memory.requiredUpgraders) {
-                        Game.spawns['Spawn1'].spawnUpgrader(extensionCount);
+                    if (upgraderACount < Memory.requiredUpgraders) {
+                        Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'A');
+                    }
+                    else {
+                        if (upgraderBCount < Memory.requiredBUpgraders) {
+                            Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'B');
+                        }
                     }
                 }
             }

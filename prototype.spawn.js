@@ -96,7 +96,7 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
     }
 };
 
-StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
+StructureSpawn.prototype.spawnUpgrader = function(extensionCount, group) {
     let newName = 'upgrader' + Game.time;
 
     console.log('Spawning: ' + newName);
@@ -130,6 +130,8 @@ StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
         creep.memory.status = 'stocking';
 
         creep.memory.targetID = 'none';
+
+        creep.memory.group = group;
     }
 };
 
