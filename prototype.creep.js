@@ -7,10 +7,27 @@ Creep.prototype.runHarvester = function() {
         container = Game.getObjectById(Memory.containerA);
     }
     else {
-        source = Game.getObjectById(Memory.sourceB);
+        if (this.memory.source == 'B') {
+            source = Game.getObjectById(Memory.sourceB);
 
-        container = Game.getObjectById(Memory.containerB);
+            container = Game.getObjectById(Memory.containerB);
+        }
+        else {
+            if (this.memory.source == 'C') {
+                source = Game.getObjectById(Memory.sourceC);
+    
+                container = Game.getObjectById(Memory.containerC);
+            }
+            else {
+                if (this.memory.source == 'D') {
+                    source = Game.getObjectById(Memory.sourceD);
+        
+                    container = Game.getObjectById(Memory.containerD);
+                }
+            }
+        }
     }
+
     if (container != null) {
         if (this.pos.isEqualTo(container)) {
             this.harvest(source);
@@ -30,16 +47,45 @@ Creep.prototype.runCollector = function() {
     Memory.collectorTTL = this.ticksToLive;
 
     if (this.memory.status == 'collecting') {
-        if (this.memory.targetID == 'none') {
-            this.findBestResources();
+        if (this.memory.group == 'B') {
+            let flag = Game.flags['Flag1'];
+
+            if (this.pos.isEqualTo(flag.pos)){
+                this.memory.hitFlag = 'true';
+            }
+
+            if (this.memory.hitFlag == false) {
+                this.moveTo(Game.flags['Flag1']);
+            }
+            else {
+                if (this.memory.targetID == 'none') {
+                    this.findBestResources();
+                }
+                else {
+                    let result = this.collectResources();
+        
+                    if (result == OK) {
+                        this.memory.status = 'depositing';
+
+                        this.memory.hitFlag = 'false';
+        
+                        this.memory.target = 'extensions';
+                    }
+                }
+            }
         }
         else {
-            let result = this.collectResources();
+            if (this.memory.targetID == 'none') {
+                this.findBestResources();
+            }
+            else {
+                let result = this.collectResources();
 
-            if (result == OK) {
-                this.memory.status = 'depositing';
+                if (result == OK) {
+                    this.memory.status = 'depositing';
 
-                this.memory.target = 'extensions';
+                    this.memory.target = 'extensions';
+                }
             }
         }
     }
@@ -47,118 +93,139 @@ Creep.prototype.runCollector = function() {
     if (this.memory.status == 'depositing') {
         let target;
 
-        if (this.memory.target == 'extensions') {
-            let extensions = this.room.find(FIND_MY_STRUCTURES, {
-                filter: {structureType: STRUCTURE_EXTENSION}
-                });
+        let flag = Game.flags['Flag2'];
 
-            if (extensions.length > 0) {    
-                target = _.max(extensions, function( extension )
-                    { return extension.store.getFreeCapacity(RESOURCE_ENERGY); });
-
-                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {                    
-                    this.memory.target = 'spawn';
-                }
-                else {
-                    let result = this.transfer(target, RESOURCE_ENERGY);                    
-
-                    if (result == ERR_NOT_IN_RANGE) {
-                        this.moveTo(target);
-                    }
-
-                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
-                        this.memory.status = 'collecting';
-                    }
-                }
-            }
-            else {
-                this.memory.target = 'spawn';
-            }
+        if (this.pos.isEqualTo(flag.pos)) {
+            this.memory.hitFlag = true;
         }
 
-        if (this.memory.target == 'spawn') {
-            if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) == 0)
-            {
-                this.memory.target = 'towers';
-            }
-            else {
-                target = Game.spawns['Spawn1'];
+        if (this.memory.hitFlag == 'false') {
+            this.moveTo(Game.flags['Flag2']);
+        }
+        else {
+            if (this.memory.target == 'extensions') {
+                let extensions = this.room.find(FIND_MY_STRUCTURES, {
+                    filter: {structureType: STRUCTURE_EXTENSION}
+                    });
 
-                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                if (extensions.length > 0) {    
+                    target = _.max(extensions, function( extension )
+                        { return extension.store.getFreeCapacity(RESOURCE_ENERGY); });
+
+                    if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {                    
+                        this.memory.target = 'spawn';
+                    }
+                    else {
+                        let result = this.transfer(target, RESOURCE_ENERGY);                    
+
+                        if (result == ERR_NOT_IN_RANGE) {
+                            this.moveTo(target);
+                        }
+
+                        if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                            this.memory.status = 'collecting';
+
+                            this.memory.hitFlag = false;
+                        }
+                    }
+                }
+                else {
+                    this.memory.target = 'spawn';
+                }
+            }
+
+            if (this.memory.target == 'spawn') {
+                if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) == 0)
+                {
                     this.memory.target = 'towers';
                 }
                 else {
-                    let result = this.transfer(target, RESOURCE_ENERGY);
+                    target = Game.spawns['Spawn1'];
 
-                    if (result == ERR_NOT_IN_RANGE) {
-                        this.moveTo(target);
-                    }
-
-                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
-                        this.memory.status = 'collecting';
-                    }
-
-                    if (result == ERR_FULL) {
+                    if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
                         this.memory.target = 'towers';
                     }
+                    else {
+                        let result = this.transfer(target, RESOURCE_ENERGY);
+
+                        if (result == ERR_NOT_IN_RANGE) {
+                            this.moveTo(target);
+                        }
+
+                        if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                            this.memory.status = 'collecting';
+
+                            this.memory.hitFlag = false;
+                        }
+
+                        if (result == ERR_FULL) {
+                            this.memory.target = 'towers';
+                        }
+                    }
                 }
             }
-        }
 
-        if (this.memory.target == 'towers') {
-            let towers = this.room.find(FIND_MY_STRUCTURES, {
-                filter: {structureType: STRUCTURE_TOWER}
-            });
+            if (this.memory.target == 'towers') {
+                let towers = this.room.find(FIND_MY_STRUCTURES, {
+                    filter: {structureType: STRUCTURE_TOWER}
+                });
 
-            if (towers.length > 0) {    
-                target = _.max(towers, function( tower )
-                    { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
+                if (towers.length > 0) {    
+                    target = _.max(towers, function( tower )
+                        { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
 
-                if (target.store.getFreeCapacity(RESOURCE_ENERGY) < 20) {
+                    if (target.store.getFreeCapacity(RESOURCE_ENERGY) < 20) {
+                        this.memory.target = 'storage';
+                    }
+                    else {
+                        let result = this.transfer(target, RESOURCE_ENERGY);
+        
+                        if (result == ERR_NOT_IN_RANGE) {
+                            this.moveTo(target);
+                        }
+                
+                        if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                            this.memory.status = 'collecting';
+
+                            this.memory.hitFlag = false;
+                        }
+                    }
+                }
+                else {
                     this.memory.target = 'storage';
                 }
-                else {
-                    let result = this.transfer(target, RESOURCE_ENERGY);
-    
-                    if (result == ERR_NOT_IN_RANGE) {
-                        this.moveTo(target);
+            }
+
+            if (this.memory.target == 'storage') {
+                if (this.room.storage != null) {
+                    target = this.room.storage;
+
+                    if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                        this.memory.target = 'extensions';
                     }
-            
-                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
-                        this.memory.status = 'collecting';
+                    else {
+                        let result = this.transfer(target, RESOURCE_ENERGY);
+
+                        if (result == ERR_NOT_IN_RANGE) {
+                            this.moveTo(target);
+                        }
+
+                        if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                            this.memory.status = 'collecting';
+
+                            this.memory.hitFlag = false;
+                        }
+
+                        if (result == OK) {
+                            this.memory.status = 'collecting';
+
+                            this.memory.hitFlag = false;
+                        }
                     }
                 }
-            }
-            else {
-                this.memory.target = 'storage';
-            }
-        }
-
-        if (this.memory.target == 'storage') {
-            if (this.room.storage != null) {
-                target = this.room.storage;
-
-                if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                else {
                     this.memory.target = 'extensions';
                 }
-                else {
-                    let result = this.transfer(target, RESOURCE_ENERGY);
-
-                    if (result == ERR_NOT_IN_RANGE) {
-                        this.moveTo(target);
-                    }
-
-                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
-                        this.memory.status = 'collecting';
-                    }
-
-                    if (result == OK) {
-                        this.memory.status = 'collecting';
-                    }
-                }
-            }
-            else {
-                this.memory.target = 'extensions';
             }
         }
     }
@@ -210,30 +277,110 @@ Creep.prototype.runBuilder = function(constructionSites) {
 
 Creep.prototype.runUpgrader = function() {
     if (this.memory.status == 'stocking') {
-        if (this.memory.targetID == 'none') {
-            this.findBestResources();
+        if (this.memory.group == 'B') {
+            let flag = Game.flags['Flag2'];
+
+            if (this.pos.isEqualTo(flag.pos)) {
+                this.memory.hitFlag == true;
+            }
+
+            if (this.memory.hitFlag == false) {
+                this.moveTo(Game.flags['Flag2']);
+            }
+            else {
+                if (this.memory.targetID == 'none') {
+                    this.findBestResources();
+                }
+                else {
+                    let result = this.collectResources();
+
+                    if (result == OK) {
+                        this.memory.status = 'upgrading';
+
+                        this.memory.hitFlag = false;
+                    }
+                }
+            }
         }
         else {
-            let result = this.collectResources();
+            if (this.memory.targetID == 'none') {
+                this.findBestResources();
+            }
+            else {
+                let result = this.collectResources();
 
-            if (result == OK) {
-                this.memory.status = 'upgrading';
+                if (result == OK) {
+                    this.memory.status = 'upgrading';
+
+                    this.memory.hitFlag = false;
+                }
             }
         }
     }
     else {
-        let controller = this.room.controller;
+        if (this.memory.group == 'A') {
+            let controller = this.room.controller;
 
-        let result = this.upgradeController(controller);
-        
-        if (result == ERR_NOT_IN_RANGE) {
-            this.moveTo(controller);
+            let result = this.upgradeController(controller);
+            
+            if (result == ERR_NOT_IN_RANGE) {
+                this.moveTo(controller);
+            }
+
+            if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                this.memory.status = 'stocking';
+
+                this.memory.targetID = 'none';
+
+                this.memory.hitFlag = false;
+            }
         }
+        else {
+            let flag = Game.flags['Flag1'];
 
-        if (result == ERR_NOT_ENOUGH_RESOURCES) {
-            this.memory.status = 'stocking';
+            if (this.pos.isEqualTo(flag.pos)) {
+                this.memory.hitFlag = true;
+            }
 
-            this.memory.targetID = 'none';
+            if (this.memory.hitFlag == false) {
+                this.moveTo(flag);
+            }
+            else {
+                let controller = Game.getObjectById(Memory.secondController);
+
+                let sign = controller.sign;
+
+                if (sign == null) {
+                    let result = this.signController(controller,
+                        'This room is under the control of The Hidden Guild - https://discord.gg/WRDG6Sy');
+
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(controller);
+                    }
+                }
+                else {
+                    if (controller.owner == null) {
+                        let result = this.claimController(controller);
+
+                        if (result == ERR_NOT_IN_RANGE) {
+                            this.moveTo(controller);
+                        }
+                    }
+                    else {
+                        let result = this.upgradeController(controller);
+
+                        if (result == ERR_NOT_IN_RANGE) {
+                            this.moveTo(controller);
+                        }
+
+                        if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                            this.memory.status = 'stocking';
+
+                            this.memory.hitFlag = false;
+                        }
+                    }
+                }
+            }
         }
     }
 };
@@ -262,6 +409,8 @@ Creep.prototype.findBestResources = function() {
             Memory.droppedResources = this.room.find(FIND_DROPPED_RESOURCES);
 
             this.memory.targetID = _.max( Memory.droppedResources, function( resources ){ return resources.amount; }).id;
+
+            this.memory.target = '';
         }
     }
 };
@@ -289,4 +438,13 @@ Creep.prototype.collectResources = function() {
 
         return OK;
     }
+};
+
+Creep.prototype.moveToTargetRoom = function(targetRoom) {
+    let route = Game.map.findRoute(this.room, targetRoom);
+        if(route.length > 0) {
+            let exit = this.pos.findClosestByRange(route[0].exit);
+            this.moveTo(exit);
+        }
+        //this.moveTo(new RoomPosition(25, 25, targetRoom, range: 23));
 };

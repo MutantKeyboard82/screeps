@@ -5,12 +5,19 @@ require('prototype.tower');
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
+Memory.requiredBCollectors = 1;
 Memory.requiredBuilders = 1;
 Memory.requiredUpgraders = 1;
+Memory.requiredBUpgraders = 1;
 Memory.sourceA = '59830048b097071b4adc4070';
 Memory.containerA = '291b5b24a0a1f16c9047718f';
 Memory.sourceB = '59830048b097071b4adc406f';
 Memory.containerB = 'b73c6100c9389349c577d5bf';
+Memory.sourceC = '59830048b097071b4adc406c';
+Memory.sourceD = '59830048b097071b4adc406a';
+Memory.secondController = '59830048b097071b4adc406b';
+Memory.homeRoom = 'E41S36';
+Memory.secondRoom = 'E41S35';
 Memory.damageThreshold = 2000;
 Memory.structuresToRepair = [];
 Memory.collectorTTL = 201;
@@ -24,11 +31,19 @@ module.exports.loop = function () {
         Memory.requiredAHarvesters = 2;
 
         Memory.requiredBHarvesters = 2;
+
+        Memory.requiredCHarvesters = 0;
+
+        Memory.requiredDHarversters = 0;
     }
     else {
         Memory.requiredAHarvesters = 1;
 
         Memory.requiredBHarvesters = 1;
+
+        Memory.requiredCHarvesters = 1;
+
+        Memory.requiredDHarvesters = 1;
     }
 
     if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) < 10000) {
@@ -69,8 +84,17 @@ module.exports.loop = function () {
     let harvestersBCount = _.filter(Game.creeps, (creep) => 
         creep.memory.role == 'harvester' && creep.memory.source == 'B').length;
 
+    let harvestersCCount = _.filter(Game.creeps, (creep) => 
+        creep.memory.role == 'harvester' && creep.memory.source == 'C').length;
+
+    let harvestersDCount = _.filter(Game.creeps, (creep) => 
+        creep.memory.role == 'harvester' && creep.memory.source == 'D').length;
+
     let collectorCount = _.filter(Game.creeps, (creep) =>
-        creep.memory.role == 'collector').length;
+        creep.memory.role == 'collector' && creep.memory.group =='A').length;
+
+    let collectorBCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'collector' && creep.memory.group == 'B').length;
 
     let builderCount = _.filter(Game.creeps, (creep) =>
         creep.memory.role == 'builder').length;
@@ -78,10 +102,17 @@ module.exports.loop = function () {
     let constructionSites = _.filter(Game.constructionSites);
 
     let upgraderCount = _.filter(Game.creeps, (creep) =>
-        creep.memory.role == 'upgrader').length;
+        creep.memory.role == 'upgrader' && creep.memory.group == 'A').length;
+
+    let upgraderBCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'upgrader' && creep.memory.group == 'B').length;
 
     if (collectorCount < Memory.requiredCollectors || Memory.collectorTTL < 200) {
-        Game.spawns['Spawn1'].spawnCollector(extensionCount);
+        Game.spawns['Spawn1'].spawnCollector(extensionCount, 'A');
+    }
+
+    if (collectorBCount < Memory.requiredBCollectors) {
+        Game.spawns['Spawn1'].spawnCollector(extensionCount, 'B')
     }
     else {
         if (harvestersACount < Memory.requiredAHarvesters) {
@@ -92,14 +123,31 @@ module.exports.loop = function () {
             if (harvestersBCount < Memory.requiredBHarvesters) {
                 Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'B');
                 console.log('Spawning B Harvester');
-            }   
+            }
             else {
-                if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
-                    Game.spawns['Spawn1'].spawnBuilder(extensionCount);
+                if (harvestersCCount < Memory.requiredCHarvesters) {
+                    Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'C');
+                    console.log('Spawning C Harvester');
                 }
                 else {
-                    if (upgraderCount < Memory.requiredUpgraders) {
-                        Game.spawns['Spawn1'].spawnUpgrader(extensionCount);
+                    if (harvestersDCount < Memory.requiredDHarvesters) {
+                        Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'D');
+                        console.log('Spawning D Harvester');
+                    }   
+                    else {
+                        if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
+                            Game.spawns['Spawn1'].spawnBuilder(extensionCount);
+                        }
+                        else {
+                            if (upgraderCount < Memory.requiredUpgraders) {
+                                Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'A');
+                            }
+                            else {
+                                if (upgraderBCount < Memory.requiredBUpgraders) {
+                                    Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'B');
+                                }
+                            }
+                        }
                     }
                 }
             }
