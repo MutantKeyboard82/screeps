@@ -5,8 +5,8 @@ require('prototype.tower');
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
-Memory.requiredBCollectors = 1;
-Memory.requiredBuilders = 1;
+Memory.requiredBCollectors = 3;
+Memory.requiredBuilders = 2;
 Memory.requiredUpgraders = 1;
 Memory.requiredBUpgraders = 1;
 Memory.sourceA = '59830048b097071b4adc4070';
@@ -14,7 +14,9 @@ Memory.containerA = '291b5b24a0a1f16c9047718f';
 Memory.sourceB = '59830048b097071b4adc406f';
 Memory.containerB = 'b73c6100c9389349c577d5bf';
 Memory.sourceC = '59830048b097071b4adc406c';
+Memory.containerC = '64ae995351a2bd26c9844a60';
 Memory.sourceD = '59830048b097071b4adc406a';
+Memory.containerD = '64ae987313dbb95045be71a0';
 Memory.secondController = '59830048b097071b4adc406b';
 Memory.homeRoom = 'E41S36';
 Memory.secondRoom = 'E41S35';
@@ -48,10 +50,18 @@ module.exports.loop = function () {
 
     if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) < 10000) {
         Memory.requiredUpgraders = 1;
+
+        Memory.requiredBUpgraders = 1;
+
+        Memory.requiredBuilders = 1;
     }
 
     if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 100000) {
-        Memory.requiredUpgraders = 5;
+        Memory.requiredUpgraders = 2;
+
+        Memory.requiredBUpgraders = 2;
+
+        Memory.requiredBuilders = 2;
     }
 
     let myRooms = _.filter(Game.rooms);
@@ -108,32 +118,32 @@ module.exports.loop = function () {
         creep.memory.role == 'upgrader' && creep.memory.group == 'B').length;
 
     if (collectorCount < Memory.requiredCollectors || Memory.collectorTTL < 200) {
-        Game.spawns['Spawn1'].spawnCollector(extensionCount, 'A');
+            Game.spawns['Spawn1'].spawnCollector(extensionCount, 'A');
     }
 
-    if (collectorBCount < Memory.requiredBCollectors) {
-        Game.spawns['Spawn1'].spawnCollector(extensionCount, 'B')
+    if (harvestersACount < Memory.requiredAHarvesters) {
+        Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'A');
+        console.log('Spawning A Harvester');
     }
     else {
-        if (harvestersACount < Memory.requiredAHarvesters) {
-            Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'A');
-            console.log('Spawning A Harvester');
+        if (harvestersBCount < Memory.requiredBHarvesters) {
+            Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'B');
+            console.log('Spawning B Harvester');
         }
         else {
-            if (harvestersBCount < Memory.requiredBHarvesters) {
-                Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'B');
-                console.log('Spawning B Harvester');
+            if (harvestersCCount < Memory.requiredCHarvesters) {
+                Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'C');
+                console.log('Spawning C Harvester');
             }
             else {
-                if (harvestersCCount < Memory.requiredCHarvesters) {
-                    Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'C');
-                    console.log('Spawning C Harvester');
-                }
+                if (harvestersDCount < Memory.requiredDHarvesters) {
+                    Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'D');
+                    console.log('Spawning D Harvester');
+                }   
                 else {
-                    if (harvestersDCount < Memory.requiredDHarvesters) {
-                        Game.spawns['Spawn1'].spawnHarvester(extensionCount, 'D');
-                        console.log('Spawning D Harvester');
-                    }   
+                    if (collectorBCount < Memory.requiredBCollectors) {
+                        Game.spawns['Spawn1'].spawnCollector(extensionCount, 'B')
+                    }
                     else {
                         if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
                             Game.spawns['Spawn1'].spawnBuilder(extensionCount);
@@ -184,9 +194,7 @@ module.exports.loop = function () {
 
     console.log('********** End tick **********');
 
-    function CheckRepairs(room) {
-        Memory.structuresToRepair = [];
-        
+    function CheckRepairs(room) {        
         let targets = room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax &&

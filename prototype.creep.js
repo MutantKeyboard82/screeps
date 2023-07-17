@@ -44,7 +44,9 @@ Creep.prototype.runHarvester = function() {
 };
 
 Creep.prototype.runCollector = function() {
-    Memory.collectorTTL = this.ticksToLive;
+    if (this.memory.group == 'A') {
+        Memory.collectorTTL = this.ticksToLive;
+    }
 
     if (this.memory.status == 'collecting') {
         if (this.memory.group == 'B') {
@@ -68,8 +70,13 @@ Creep.prototype.runCollector = function() {
                         this.memory.status = 'depositing';
 
                         this.memory.hitFlag = 'false';
-        
-                        this.memory.target = 'extensions';
+
+                        if (this.memory.group == 'B') {
+                            this.memory.target = 'Room 2 Towers';
+                        }
+                        else {
+                            this.memory.target = 'extensions';
+                        }
                     }
                 }
             }
@@ -92,6 +99,37 @@ Creep.prototype.runCollector = function() {
 
     if (this.memory.status == 'depositing') {
         let target;
+
+        if (this.memory.target == 'Room 2 Towers') {
+            let towers = this.room.find(FIND_MY_STRUCTURES, {
+                filter: {structureType: STRUCTURE_TOWER}
+            });
+
+            if (towers.length > 0) {
+                target = _.max(towers, function( tower )
+                        { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
+
+                if (target.store.getFreeCapacity(RESOURCE_ENERGY) < 20) {
+                    this.memory.target = 'extensions';
+                }
+                else {
+                    let result = this.transfer(target, RESOURCE_ENERGY);
+        
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(target);
+                    }
+            
+                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                        this.memory.status = 'collecting';
+
+                        this.memory.hitFlag = false;
+                    }
+                }
+            }
+            else {
+                this.memory.target = 'extensions';
+            }
+        }
 
         let flag = Game.flags['Flag2'];
 
@@ -238,20 +276,40 @@ Creep.prototype.runBuilder = function(constructionSites) {
     }
 
     if (this.memory.status == 'stocking') {
-        if (this.memory.targetID == 'none') {
-            this.findBestResources();
+        let flag = Game.flags['Flag2'];
+
+        if (this.pos.isEqualTo(flag.pos)) {
+            this.memory.hitFlag = true;
+        }
+
+        if (this.memory.hitFlag == false) {
+            this.moveTo(Game.flags['Flag2']);
         }
         else {
-            let result = this.collectResources();
+            if (this.memory.targetID == 'none') {
+            this.findBestResources();
+            }
+            else {
+                let result = this.collectResources();
 
-            if (result == OK) {
-                this.memory.status = 'building';
+                if (result == OK) {
+                    this.memory.status = 'building';
+
+                    this.memory.hitFlag = false;
+                }
             }
         }
     }
     else {
         if (this.memory.targetID == 'none') {
-            this.memory.targetID = this.pos.findClosestByPath(FIND_CONSTRUCTION_SITES).id;
+            let firstSite = constructionSites[0];
+
+            if (this.room.name != firstSite.room.name) {
+                this.moveTo(firstSite);
+            }
+            else {
+                this.memory.targetID = this.pos.findClosestByPath(constructionSites).id;
+            }
         }
         else {
             let target = Game.getObjectById(this.memory.targetID);
@@ -266,6 +324,8 @@ Creep.prototype.runBuilder = function(constructionSites) {
                 this.memory.status = 'stocking';
 
                 this.memory.targetID = 'none';
+
+                this.memory.hitFlag = false;
             }
 
             if (result == OK || result == ERR_INVALID_TARGET) {
@@ -281,7 +341,7 @@ Creep.prototype.runUpgrader = function() {
             let flag = Game.flags['Flag2'];
 
             if (this.pos.isEqualTo(flag.pos)) {
-                this.memory.hitFlag == true;
+                this.memory.hitFlag = true;
             }
 
             if (this.memory.hitFlag == false) {

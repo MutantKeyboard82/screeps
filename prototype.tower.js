@@ -23,6 +23,8 @@ StructureTower.prototype.defendRoom = function() {
 
             if (targets.length > 0) {
                     this.repair(targets[0]);
+
+                    Memory.structuresToRepair = [];
             }
             else {
                 let targets = this.room.find(FIND_HOSTILE_STRUCTURES);

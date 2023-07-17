@@ -45,10 +45,12 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount, group) {
 
     if (extensionCount >= 20 && extensionCount <= 99) {
         if (group == 'A') {
-            parts = this.setCreepParts(0,10,0,0,0,0,0,5);
+            // parts = this.setCreepParts(0,10,0,0,0,0,0,5);
+
+            parts = this.setCreepParts(0,11,0,0,0,0,0,6);
         }
         else {
-            parts = this.setCreepParts(0,16,0,0,0,0,0,8);
+            parts = this.setCreepParts(0,13,0,0,0,0,0,7);
         }
     }
 
