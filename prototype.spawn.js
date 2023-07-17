@@ -10,7 +10,7 @@ StructureSpawn.prototype.spawnHarvester = function(extensionCount, source) {
     }
 
     if (extensionCount >= 5) {
-        parts = this.setCreepParts(5,0,0,0,0,0,0,1);
+        parts = this.setCreepParts(5,0,0,0,0,0,0,5);
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
@@ -22,7 +22,7 @@ StructureSpawn.prototype.spawnHarvester = function(extensionCount, source) {
     }
 };
 
-StructureSpawn.prototype.spawnCollector = function(extensionCount) {
+StructureSpawn.prototype.spawnCollector = function(extensionCount, group) {
     let newName = 'collector' + Game.time;
 
     console.log('Spawning: ' + newName);
@@ -31,7 +31,6 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
      * @type {BodyPartConstant[]}
      */
     let parts;
-
     if (extensionCount >= 0 && extensionCount <= 4) {
         parts = this.setCreepParts(0,4,0,0,0,0,0,2);
     }
@@ -45,7 +44,14 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
     }
 
     if (extensionCount >= 20 && extensionCount <= 99) {
-        parts = this.setCreepParts(0,10,0,0,0,0,0,5);
+        if (group == 'A') {
+            // parts = this.setCreepParts(0,10,0,0,0,0,0,5);
+
+            parts = this.setCreepParts(0,11,0,0,0,0,0,6);
+        }
+        else {
+            parts = this.setCreepParts(0,13,0,0,0,0,0,7);
+        }
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
@@ -56,6 +62,8 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount) {
         creep.memory.status = 'collecting';
 
         creep.memory.targetID = 'none';
+
+        creep.memory.group = group;
     }
 };
 
@@ -96,7 +104,7 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
     }
 };
 
-StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
+StructureSpawn.prototype.spawnUpgrader = function(extensionCount, group) {
     let newName = 'upgrader' + Game.time;
 
     console.log('Spawning: ' + newName);
@@ -130,6 +138,8 @@ StructureSpawn.prototype.spawnUpgrader = function(extensionCount) {
         creep.memory.status = 'stocking';
 
         creep.memory.targetID = 'none';
+
+        creep.memory.group = group;
     }
 };
 
