@@ -5,10 +5,11 @@ require('prototype.tower');
 Memory.requiredAHarvesters = 2;
 Memory.requiredBHarvesters = 2;
 Memory.requiredCollectors = 1;
-Memory.requiredBCollectors = 3;
+Memory.requiredBCollectors = 1;
 Memory.requiredBuilders = 2;
 Memory.requiredUpgraders = 1;
 Memory.requiredBUpgraders = 1;
+Memory.requiredStorageTransfer = 1;
 Memory.sourceA = '59830048b097071b4adc4070';
 Memory.containerA = '291b5b24a0a1f16c9047718f';
 Memory.sourceB = '59830048b097071b4adc406f';
@@ -18,6 +19,8 @@ Memory.containerC = '64ae995351a2bd26c9844a60';
 Memory.sourceD = '59830048b097071b4adc406a';
 Memory.containerD = '64ae987313dbb95045be71a0';
 Memory.secondController = '59830048b097071b4adc406b';
+Memory.sourceLinkA = '64b524a199c1ff18019fc898';
+Memory.storageLink = '64b515e25382d89c6d16f70e';
 Memory.homeRoom = 'E41S36';
 Memory.secondRoom = 'E41S35';
 Memory.damageThreshold = 2000;
@@ -56,12 +59,20 @@ module.exports.loop = function () {
         Memory.requiredBuilders = 1;
     }
 
-    if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 100000) {
+    if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 50000) {
         Memory.requiredUpgraders = 2;
 
         Memory.requiredBUpgraders = 2;
 
         Memory.requiredBuilders = 2;
+    }
+
+    if (Game.spawns['Spawn1'].room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 100000) {
+        Memory.requiredUpgraders = 3;
+
+        Memory.requiredBUpgraders = 3;
+
+        Memory.requiredBuilders = 3;
     }
 
     let myRooms = _.filter(Game.rooms);
@@ -106,6 +117,9 @@ module.exports.loop = function () {
     let collectorBCount = _.filter(Game.creeps, (creep) =>
         creep.memory.role == 'collector' && creep.memory.group == 'B').length;
 
+    let transferCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'transfer').length;
+
     let builderCount = _.filter(Game.creeps, (creep) =>
         creep.memory.role == 'builder').length;
 
@@ -145,16 +159,21 @@ module.exports.loop = function () {
                         Game.spawns['Spawn1'].spawnCollector(extensionCount, 'B')
                     }
                     else {
-                        if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
-                            Game.spawns['Spawn1'].spawnBuilder(extensionCount);
+                        if (transferCount < Memory.requiredStorageTransfer) {
+                            Game.spawns['Spawn1'].spawnTransfer();
                         }
                         else {
-                            if (upgraderCount < Memory.requiredUpgraders) {
-                                Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'A');
+                            if (constructionSites.length > 0 && builderCount < Memory.requiredBuilders) {
+                                Game.spawns['Spawn1'].spawnBuilder(extensionCount);
                             }
                             else {
-                                if (upgraderBCount < Memory.requiredBUpgraders) {
-                                    Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'B');
+                                if (upgraderCount < Memory.requiredUpgraders) {
+                                    Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'A');
+                                }
+                                else {
+                                    if (upgraderBCount < Memory.requiredBUpgraders) {
+                                        Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'B');
+                                    }
                                 }
                             }
                         }
@@ -182,9 +201,15 @@ module.exports.loop = function () {
         if (creep.memory.role == 'upgrader') {
             creep.runUpgrader();
         }
+
+        if (creep.memory.role == 'transfer') {
+            creep.runTransfer();
+        }
     }
 
     myTowers.forEach(tower => tower.defendRoom())
+
+    TransferEnergy();
     
     for(var i in Memory.creeps) {
         if(!Game.creeps[i]) {
@@ -211,5 +236,19 @@ module.exports.loop = function () {
             }
         });
         roomTowers.forEach(tower => myTowers.push(tower));
+    };
+
+    function TransferEnergy() {
+        let link = Game.getObjectById(Memory.sourceLinkA);
+
+        let targetLink = Game.getObjectById(Memory.storageLink);
+
+        let availableCapacity = targetLink.store.getFreeCapacity(RESOURCE_ENERGY);
+
+        let usedCapacity = link.store.getUsedCapacity(RESOURCE_ENERGY);
+
+        if (availableCapacity > 0 && usedCapacity > 0) {
+            link.transferEnergy(targetLink, usedCapacity);
+        }
     };
 }
