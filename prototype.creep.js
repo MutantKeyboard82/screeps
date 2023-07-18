@@ -110,7 +110,7 @@ Creep.prototype.runCollector = function() {
                         { return tower.store.getFreeCapacity(RESOURCE_ENERGY); });
 
                 if (target.store.getFreeCapacity(RESOURCE_ENERGY) < 20) {
-                    this.memory.target = 'extensions';
+                    this.memory.target = 'link';
                 }
                 else {
                     let result = this.transfer(target, RESOURCE_ENERGY);
@@ -127,7 +127,7 @@ Creep.prototype.runCollector = function() {
                 }
             }
             else {
-                this.memory.target = 'extensions';
+                this.memory.target = 'link';
             }
         }
 
@@ -141,6 +141,29 @@ Creep.prototype.runCollector = function() {
             this.moveTo(Game.flags['Flag2']);
         }
         else {
+            if (this.memory.target == 'link') {
+                let flag = Game.flags['Flag3'];
+
+                if (!this.pos.isEqualTo(flag)) {
+                    this.moveTo(flag);
+                }
+                else {
+                    let targetLink = Game.getObjectById(Memory.sourceLinkA);
+
+                    let result = this.transfer(targetLink, RESOURCE_ENERGY);
+
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(targetLink);
+                    }
+
+                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                        this.memory.status = 'collecting';
+
+                        this.memory.hitFlag = false;
+                    }
+                }
+            }
+
             if (this.memory.target == 'extensions') {
                 let extensions = this.room.find(FIND_MY_STRUCTURES, {
                     filter: {structureType: STRUCTURE_EXTENSION}
@@ -497,6 +520,26 @@ Creep.prototype.collectResources = function() {
         this.memory.targetID = 'none';
 
         return OK;
+    }
+};
+
+Creep.prototype.runTransfer = function() {
+    let position = new RoomPosition(22, 28, Memory.homeRoom);
+
+    if (!this.pos.isEqualTo(position)) {
+        this.moveTo(position);
+    }
+    else {
+        let link = Game.getObjectById(Memory.storageLink);
+
+        if (this.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+            this.transfer(this.room.storage, RESOURCE_ENERGY);
+        }
+        else {
+            if (link.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+                this.withdraw(link, RESOURCE_ENERGY);
+            }
+        }
     }
 };
 

@@ -43,15 +43,17 @@ StructureSpawn.prototype.spawnCollector = function(extensionCount, group) {
         parts = this.setCreepParts(0,10,0,0,0,0,0,5);
     }
 
-    if (extensionCount >= 20 && extensionCount <= 99) {
+    if (extensionCount >= 20 && extensionCount <= 29) {
         if (group == 'A') {
-            // parts = this.setCreepParts(0,10,0,0,0,0,0,5);
-
-            parts = this.setCreepParts(0,11,0,0,0,0,0,6);
+            parts = this.setCreepParts(0,16,0,0,0,0,0,8);
         }
         else {
-            parts = this.setCreepParts(0,13,0,0,0,0,0,7);
+            parts = this.setCreepParts(0,12,0,0,0,0,0,6);
         }
+    }
+
+    if (extensionCount >= 30 && extensionCount <= 99) {
+            parts = this.setCreepParts(0,24,0,0,0,0,0,12);
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
@@ -89,8 +91,12 @@ StructureSpawn.prototype.spawnBuilder = function(extensionCount) {
         parts = this.setCreepParts(3,5,0,0,0,0,0,4);
     }
 
-    if (extensionCount >= 20 && extensionCount <= 99) {
+    if (extensionCount >= 20 && extensionCount <= 29) {
         parts = this.setCreepParts(6,7,0,0,0,0,0,7);
+    }
+
+    if (extensionCount >= 30 && extensionCount <= 99) {
+        parts = this.setCreepParts(9,9,0,0,0,0,0,9);
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
@@ -126,8 +132,12 @@ StructureSpawn.prototype.spawnUpgrader = function(extensionCount, group) {
         parts = this.setCreepParts(3,5,0,0,0,0,0,4);
     }
 
-    if (extensionCount >= 20 && extensionCount <= 99) {
+    if (extensionCount >= 20 && extensionCount <= 29) {
         parts = this.setCreepParts(6,7,0,0,0,0,0,7);
+    }
+
+    if (extensionCount >= 30 && extensionCount <= 99) {
+        parts = this.setCreepParts(9,9,0,0,0,0,0,9);
     }
 
     if (this.spawnCreep(parts, newName) == OK) {
@@ -189,4 +199,20 @@ StructureSpawn.prototype.setCreepParts = function(work,carry,ranged,attack,heal,
     }
 
     return parts;
+};
+
+StructureSpawn.prototype.spawnTransfer = function() {
+    let newName = 'transfer' + Game.time;
+
+    console.log('Spawning: ' + newName);
+
+    let parts;
+
+    parts = this.setCreepParts(0,2,0,0,0,0,0,2);
+    
+    if (this.spawnCreep(parts, newName) == OK) {
+        let creep = Game.creeps[newName];
+
+        creep.memory.role = 'transfer';
+    }
 };
