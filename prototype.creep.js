@@ -468,6 +468,81 @@ Creep.prototype.runUpgrader = function() {
     }
 };
 
+Creep.prototype.runCUpgrader = function() {
+    if (this.memory.status == 'stocking') {
+        let flag = Game.flags['Flag2'];
+
+        if (this.pos.isEqualTo(flag.pos)) {
+            this.memory.hitFlag = true;
+        }
+
+        if (this.memory.hitFlag == false) {
+            this.moveTo(Game.flags['Flag2']);
+        }
+        else {
+            if (this.memory.targetID == 'none') {
+                this.findBestResources();
+            }
+            else {
+                let result = this.collectResources();
+
+                if (result == OK) {
+                    this.memory.status = 'upgrading';
+
+                    this.memory.hitFlag = false;
+                }
+            }
+        }
+    }
+    else {
+        let flag = Game.flags['Flag1'];
+
+        if (this.pos.isEqualTo(flag.pos)) {
+            this.memory.hitFlag = true;
+        }
+
+        if (this.memory.hitFlag == false) {
+            this.moveTo(flag);
+        }
+        else {
+            let controller = Game.getObjectById(Memory.thirdController);
+
+            let sign = controller.sign;
+
+            if (sign == null) {
+                let result = this.signController(controller,
+                    'This room is under the control of The Hidden Guild - https://discord.gg/WRDG6Sy');
+
+                if (result == ERR_NOT_IN_RANGE) {
+                    this.moveTo(controller);
+                }
+            }
+            else {
+                if (controller.owner == null) {
+                    let result = this.claimController(controller);
+
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(controller);
+                    }
+                }
+                else {
+                    let result = this.upgradeController(controller);
+
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(controller);
+                    }
+
+                    if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                        this.memory.status = 'stocking';
+
+                        this.memory.hitFlag = false;
+                    }
+                }
+            }
+        }
+    }
+};
+
 Creep.prototype.findBestResources = function() {
     if ((this.memory.role != 'collector' && this.room.storage != null) ||
         (this.memory.role == 'collector' && this.room.energyAvailable != this.room.energyCapacityAvailable &&

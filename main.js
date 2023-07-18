@@ -9,6 +9,7 @@ Memory.requiredBCollectors = 1;
 Memory.requiredBuilders = 2;
 Memory.requiredUpgraders = 1;
 Memory.requiredBUpgraders = 1;
+Memory.requiredCUpgraders = 0;
 Memory.requiredStorageTransfer = 1;
 Memory.sourceA = '59830048b097071b4adc4070';
 Memory.containerA = '291b5b24a0a1f16c9047718f';
@@ -19,10 +20,12 @@ Memory.containerC = '64ae995351a2bd26c9844a60';
 Memory.sourceD = '59830048b097071b4adc406a';
 Memory.containerD = '64ae987313dbb95045be71a0';
 Memory.secondController = '59830048b097071b4adc406b';
+Memory.thirdController = '59830056b097071b4adc41ac';
 Memory.sourceLinkA = '64b524a199c1ff18019fc898';
 Memory.storageLink = '64b515e25382d89c6d16f70e';
 Memory.homeRoom = 'E41S36';
 Memory.secondRoom = 'E41S35';
+Memory.thirdRoom = 'E42S36';
 Memory.damageThreshold = 2000;
 Memory.structuresToRepair = [];
 Memory.collectorTTL = 201;
@@ -56,6 +59,8 @@ module.exports.loop = function () {
 
         Memory.requiredBUpgraders = 1;
 
+        Memory.requiredCUpgraders = 1;
+
         Memory.requiredBuilders = 1;
     }
 
@@ -64,6 +69,8 @@ module.exports.loop = function () {
 
         Memory.requiredBUpgraders = 2;
 
+        Memory.requiredCUpgraders = 2;
+
         Memory.requiredBuilders = 2;
     }
 
@@ -71,6 +78,8 @@ module.exports.loop = function () {
         Memory.requiredUpgraders = 3;
 
         Memory.requiredBUpgraders = 3;
+
+        Memory.requiredCUpgraders = 3;
 
         Memory.requiredBuilders = 3;
     }
@@ -131,6 +140,9 @@ module.exports.loop = function () {
     let upgraderBCount = _.filter(Game.creeps, (creep) =>
         creep.memory.role == 'upgrader' && creep.memory.group == 'B').length;
 
+    let upgraderCCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == 'upgrader' && creep.memory.group == 'C').length;
+
     if (collectorCount < Memory.requiredCollectors || Memory.collectorTTL < 200) {
             Game.spawns['Spawn1'].spawnCollector(extensionCount, 'A');
     }
@@ -174,6 +186,11 @@ module.exports.loop = function () {
                                     if (upgraderBCount < Memory.requiredBUpgraders) {
                                         Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'B');
                                     }
+                                    else {
+                                        if (upgraderCCount < Memory.requiredCUpgraders) {
+                                            Game.spawns['Spawn1'].spawnUpgrader(extensionCount, 'C');
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -199,7 +216,12 @@ module.exports.loop = function () {
         }
 
         if (creep.memory.role == 'upgrader') {
-            creep.runUpgrader();
+            if (creep.memory.group == 'C') {
+                creep.runCUpgrader();
+            }
+            else {
+                creep.runUpgrader();
+            }
         }
 
         if (creep.memory.role == 'transfer') {
