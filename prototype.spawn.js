@@ -1,4 +1,10 @@
+const { Creep2 } = require('./creep');
+
 StructureSpawn.prototype.runSpawner = function() {
+    let creep = new Creep2('Name', 'Role', 'group', 'status', 'targetID', 'container');
+
+    console.log(creep);
+
     this.setBuildQueue();
 
     this.buildCreeps();

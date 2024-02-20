@@ -4,7 +4,6 @@ require('prototype.spawn');
 require('prototype.tower');
 
 module.exports.loop = function () {
-    // Build Queue
     console.log('********** Start tick ' + Game.time + ' **********');
 
     let spawn = Game.spawns['Spawn1'];
