@@ -1,4 +1,6 @@
 StructureTower.prototype.defendRoom = function() {
+const hitThreshold = 400000;
+
     let hostiles = this.room.find(FIND_HOSTILE_CREEPS);
 
     if(hostiles.length > 0) {
@@ -19,12 +21,15 @@ StructureTower.prototype.defendRoom = function() {
             this.heal(creepsToRepair[0]);
         }        
         else {
-            let targets = _.filter(Memory.structuresToRepair, (structure) =>  structure.room == this.room);
+            let targets = this.checkRepairs(); 
 
             if (targets.length > 0) {
-                    this.repair(targets[0]);
+                    let sortedTarget = _.min(targets, function( target )
+                    { return target.hits; });
 
-                    Memory.structuresToRepair = [];
+                    if (sortedTarget.hits < hitThreshold) {
+                        this.repair(sortedTarget);
+                    }
             }
             else {
                 let targets = this.room.find(FIND_HOSTILE_STRUCTURES);
@@ -35,4 +40,17 @@ StructureTower.prototype.defendRoom = function() {
             }
         }
     }
+};
+
+StructureTower.prototype.checkRepairs = function() {
+    let targets = this.room.find(FIND_STRUCTURES, {
+        filter: (structure) => {
+            return (structure.hits < structure.hitsMax
+            );
+        }
+    });
+
+    let sortedTargets = targets.sort(function(a, b){return a.hits - b.hits});
+
+    return sortedTargets;
 };
