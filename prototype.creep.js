@@ -37,7 +37,7 @@ Creep.prototype.runHarvester = function() {
     let source = Game.getObjectById(this.memory.targetID);
 
     if (this.memory.status == 'harvesting') {
-        if (this.memory.container == 'none') {
+        if (this.memory.container == null) {
             this.findContainer();
 
             if(this.harvest(source) == ERR_NOT_IN_RANGE) {
@@ -58,9 +58,7 @@ Creep.prototype.runHarvester = function() {
 };
 
 Creep.prototype.runCollector = function() {
-    if (this.memory.status == 'moving') {
-        console.log(this.name + 'Here');
-        
+    if (this.memory.status == 'moving') {        
         if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
             let target = Game.getObjectById(this.memory.targetID);
 
@@ -86,7 +84,7 @@ Creep.prototype.runCollector = function() {
 
     if (this.memory.status == 'collecting') {
         if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            if (this.memory.container != 'none') {
+            if (this.memory.container != null) {
                 this.collectFromContainer();
             }
             else {
@@ -136,12 +134,7 @@ Creep.prototype.CollectDroppedResources = function() {
 
         this.memory.target = 'extensions';
 
-        if (this.memory.halfLoads == null) {
-            this.memory.halfLoads = 1;
-        }
-        else {
-            this.memory.halfLoads = this.memory.halfLoads + 1;
-        }
+        this.checkForHalfLoads();
     }
 };
 
@@ -320,6 +313,19 @@ Creep.prototype.collectFromContainer = function() {
         this.memory.status = 'depositing';
 
         this.memory.target = 'extensions';
+
+        this.checkForHalfLoads();
+    }
+};
+
+Creep.prototype.checkForHalfLoads = function() {
+    if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+        if (this.memory.halfLoads == null) {
+            this.memory.halfLoads = 1;
+        }
+        else {
+            this.memory.halfLoads = this.memory.halfLoads + 1;
+        }
     }
 };
 

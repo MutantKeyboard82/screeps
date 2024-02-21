@@ -15,7 +15,9 @@ function CreepBlueprint(role, group, status, parts, targetID = null, container =
 StructureSpawn.prototype.runSpawner = function() {
     this.setBuildQueue();
 
-    this.buildCreeps();
+    if (this.memory.buildQueue.length > 0) {
+        this.buildCreeps();
+    }
 
     // this.queueBuilders();
 
@@ -29,39 +31,44 @@ StructureSpawn.prototype.setBuildQueue = function() {
 
     let sources = this.room.find(FIND_SOURCES);
 
-    this.queueCollectors(sources);
+    this.queueCreeps(sources, 'collector', 'moving');
+
+    this.queueCreeps(sources, 'harvester', 'harvesting');
+
+    // this.queueCollectors(sources);
 
     // this.queueHarvesters(sources);
 
     // this.queueUpgraders();
 };
 
-StructureSpawn.prototype.queueHarvesters = function(sources) {
+// StructureSpawn.prototype.queueHarvesters = function(sources) {
+//     for (var i in sources) {
+//         let creepCount = _.filter(Game.creeps, (creep) =>
+//             creep.memory.role == 'harvester' && creep.memory.targetID == sources[i].id).length;
+
+//         if (creepCount == 0) {
+
+//             let creepToBuild = {role: 'harvester', group: 'basic', status: 'harvesting', targetID: sources[i].id, container: 'none'};
+
+//             this.memory.buildQueue.push(creepToBuild);
+//         }
+//     }
+// };
+
+StructureSpawn.prototype.queueCreeps = function(sources, role, status) {
     for (var i in sources) {
         let creepCount = _.filter(Game.creeps, (creep) =>
-            creep.memory.role == 'harvester' && creep.memory.targetID == sources[i].id).length;
-
-        if (creepCount == 0) {
-            let creepToBuild = {role: 'harvester', group: 'basic', status: 'harvesting', targetID: sources[i].id, container: 'none'};
-
-            this.memory.buildQueue.push(creepToBuild);
-        }
-    }
-};
-
-StructureSpawn.prototype.queueCollectors = function(sources) {
-    for (var i in sources) {
-        let creepCount = _.filter(Game.creeps, (creep) =>
-            creep.memory.role == 'collector' && creep.memory.targetID == sources[i].id).length;
+            creep.memory.role == role && creep.memory.targetID == sources[i].id).length;
 
         if (creepCount == 0) {
             let storedBlueprint = _.find(this.memory.storedBlueprints, (blueprint) =>
-                blueprint.role == 'collector' && blueprint.targetID == sources[i].id);
+                blueprint.role == role && blueprint.targetID == sources[i].id);
             
             if (storedBlueprint == null) {
-                let parts = this.setParts('collector');
+                let parts = this.setParts(role);
 
-                let blueprint = new CreepBlueprint('collector', 'basic', 'moving', parts, sources[i].id);
+                let blueprint = new CreepBlueprint(role, 'basic', status, parts, sources[i].id);
 
                 if (this.memory.storedBlueprints == null) {
                     this.memory.storedBlueprints = [];
@@ -90,26 +97,25 @@ StructureSpawn.prototype.queueUpgraders = function() {
 };
 
 StructureSpawn.prototype.buildCreeps = function() {
-    if (this.memory.buildQueue.length > 0) {
-        let blueprint = this.memory.buildQueue.shift();
+    
+    let blueprint = this.memory.buildQueue.shift();
 
-        let newName = blueprint.role + Game.time;
+    let newName = blueprint.role + Game.time;
 
-        console.log('Spawning: ' + newName);
+    console.log('Spawning: ' + newName);
 
-        if (this.spawnCreep(blueprint.parts, newName) == OK) {
-            let creep = Game.creeps[newName];
+    if (this.spawnCreep(blueprint.parts, newName) == OK) {
+        let creep = Game.creeps[newName];
 
-            creep.memory.role = blueprint.role;
+        creep.memory.role = blueprint.role;
 
-            creep.memory.group = blueprint.group;
+        creep.memory.group = blueprint.group;
 
-            creep.memory.status = blueprint.status;
+        creep.memory.status = blueprint.status;
 
-            creep.memory.targetID = blueprint.targetID;
+        creep.memory.targetID = blueprint.targetID;
 
-            creep.memory.container = blueprint.container;
-        }
+        creep.memory.container = blueprint.container;
     }
 };
 
@@ -134,6 +140,16 @@ StructureSpawn.prototype.setParts = function(role) {
             }
 
             break;
+
+        case "harvester":
+            if (energyCapacityAvailable < 550) {
+                return this.setCreepParts(2,0,0,0,0,0,0,2);
+            }
+        
+            if (energyCapacityAvailable >= 550) {
+                return this.setCreepParts(5,0,0,0,0,0,0,5);
+            }
+        break;
     }
 };
 
