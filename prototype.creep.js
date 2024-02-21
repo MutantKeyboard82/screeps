@@ -59,6 +59,8 @@ Creep.prototype.runHarvester = function() {
 
 Creep.prototype.runCollector = function() {
     if (this.memory.status == 'moving') {
+        console.log(this.name + 'Here');
+        
         if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
             let target = Game.getObjectById(this.memory.targetID);
 

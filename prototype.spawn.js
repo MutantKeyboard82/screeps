@@ -1,10 +1,18 @@
-const { Creep2 } = require('./creep');
+function CreepBlueprint(role, group, status, parts, targetID = null, container = null) {
+    this.role = role;
+
+    this.group = group;
+
+    this.status = status;
+
+    this.targetID = targetID;
+
+    this.parts = parts;
+
+    this.container = container;
+}
 
 StructureSpawn.prototype.runSpawner = function() {
-    let creep = new Creep2('Name', 'Role', 'group', 'status', 'targetID', 'container');
-
-    console.log(creep);
-
     this.setBuildQueue();
 
     this.buildCreeps();
@@ -15,15 +23,17 @@ StructureSpawn.prototype.runSpawner = function() {
 };
 
 StructureSpawn.prototype.setBuildQueue = function() {
-    this.memory.buildQueue = [];
+    if (this.memory.buildQueue == null) {
+        this.memory.buildQueue = [];
+    }
 
     let sources = this.room.find(FIND_SOURCES);
 
-    this.queueHarvesters(sources);
-
     this.queueCollectors(sources);
 
-    this.queueUpgraders();
+    // this.queueHarvesters(sources);
+
+    // this.queueUpgraders();
 };
 
 StructureSpawn.prototype.queueHarvesters = function(sources) {
@@ -45,9 +55,25 @@ StructureSpawn.prototype.queueCollectors = function(sources) {
             creep.memory.role == 'collector' && creep.memory.targetID == sources[i].id).length;
 
         if (creepCount == 0) {
-            let creepToBuild = {role: 'collector', group: 'basic', status: 'moving', targetID: sources[i].id, container: 'none'};
+            let storedBlueprint = _.find(this.memory.storedBlueprints, (blueprint) =>
+                blueprint.role == 'collector' && blueprint.targetID == sources[i].id);
+            
+            if (storedBlueprint == null) {
+                let parts = this.setParts('collector');
 
-            this.memory.buildQueue.push(creepToBuild);
+                let blueprint = new CreepBlueprint('collector', 'basic', 'moving', parts, sources[i].id);
+
+                if (this.memory.storedBlueprints == null) {
+                    this.memory.storedBlueprints = [];
+                }
+
+                this.memory.storedBlueprints.push(blueprint);
+
+                this.memory.buildQueue.push(blueprint);
+            }
+            else {
+                this.memory.buildQueue.push(storedBlueprint);
+            }
         }
     }
 };
@@ -65,31 +91,53 @@ StructureSpawn.prototype.queueUpgraders = function() {
 
 StructureSpawn.prototype.buildCreeps = function() {
     if (this.memory.buildQueue.length > 0) {
-        let newCreep = this.memory.buildQueue.shift();
+        let blueprint = this.memory.buildQueue.shift();
 
-        let newName = newCreep.role + Game.time;
+        let newName = blueprint.role + Game.time;
 
         console.log('Spawning: ' + newName);
 
-        let parts = this.setParts(newCreep);
-
-        if (this.spawnCreep(parts, newName) == OK) {
+        if (this.spawnCreep(blueprint.parts, newName) == OK) {
             let creep = Game.creeps[newName];
 
-            creep.memory.role = newCreep.role;
+            creep.memory.role = blueprint.role;
 
-            creep.memory.group = newCreep.group;
+            creep.memory.group = blueprint.group;
 
-            creep.memory.status = newCreep.status;
+            creep.memory.status = blueprint.status;
 
-            creep.memory.targetID = newCreep.targetID;
+            creep.memory.targetID = blueprint.targetID;
 
-            creep.memory.container = newCreep.container;
+            creep.memory.container = blueprint.container;
         }
     }
 };
 
-StructureSpawn.prototype.setParts = function(newCreep) {
+StructureSpawn.prototype.setParts = function(role) {
+    let energyCapacityAvailable = this.room.energyCapacityAvailable;
+
+    switch (role) {
+        case "collector":
+            let creepCount = _.filter(Game.creeps, (creep) =>
+                creep.memory.role == 'collector').length;
+
+            if (energyCapacityAvailable == 300 || creepCount == 0) {
+                return this.setCreepParts(0,4,0,0,0,0,0,2);
+            }
+
+            if (energyCapacityAvailable >= 550 && energyCapacityAvailable <= 750) {
+                return this.setCreepParts(0,7,0,0,0,0,0,4);
+            }
+    
+            if (energyCapacityAvailable >= 800 && energyCapacityAvailable <= 1250) {
+                return this.setCreepParts(0,10,0,0,0,0,0,5);
+            }
+
+            break;
+    }
+};
+
+StructureSpawn.prototype.setPartsOrig = function(newCreep) {
     let extensionCount = this.room.find(FIND_MY_STRUCTURES, {
         filter: {
             structureType: STRUCTURE_EXTENSION
