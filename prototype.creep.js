@@ -339,6 +339,59 @@ Creep.prototype.findContainer = function() {
     }
 };
 
+Creep.prototype.runBuilder = function() {
+    let constructionSites = _.filter(Game.constructionSites);
+
+    if (constructionSites.length == 0) {
+        this.suicide();
+    }
+
+    if (this.memory.status == 'stocking') {
+        if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            if (this.room.storage == null) {
+                this.CollectDroppedResources();
+            }
+            else {
+                this.collectFromStorage();
+            }
+        }
+        else {
+            this.memory.status = 'building';
+        }
+    }
+    else {
+        if (this.memory.targetID == null) {
+            let firstSite = constructionSites[0];
+
+            if (this.room.name != firstSite.room.name) {
+                this.moveTo(firstSite);
+            }
+            else {
+                this.memory.targetID = this.pos.findClosestByPath(constructionSites).id;
+            }
+        }
+        else {
+            let target = Game.getObjectById(this.memory.targetID);
+
+            let result = this.build(target);
+
+            if (result == ERR_NOT_IN_RANGE) {
+                this.moveTo(target);
+            }
+
+            if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                this.memory.status = 'stocking';
+
+                this.memory.targetID = null;
+            }
+
+            if (result == OK || result == ERR_INVALID_TARGET) {
+                this.memory.targetID = null;
+            }
+        }
+    }
+};
+
 // Creep.prototype.checkTTL = function() {
 //     if (this.ticksToLive < 200) {
 //         let creepCount = _.filter(Game.creeps, (creep) =>
