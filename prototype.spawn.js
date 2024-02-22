@@ -9,7 +9,31 @@ function CreepBlueprint(role, group, status, parts, targetID = null, container =
 
     this.parts = parts;
 
+    this.energyRequired = null;
+
     this.container = container;
+
+    this.calculateEnergyRequired = function() {
+        let energyCount = 0;
+
+        for(var i in this.parts) {
+            if (parts[i] == WORK) {
+                energyCount = energyCount + 100;
+            }
+
+            if (parts[i] == CARRY) {
+                energyCount = energyCount + 50;
+            }
+
+            if (parts[i] == MOVE) {
+                energyCount = energyCount + 50;
+            }
+        }
+
+        this.energyRequired = energyCount;
+
+        return energyCount;
+    }
 }
 
 StructureSpawn.prototype.runSpawner = function() {
@@ -48,8 +72,11 @@ StructureSpawn.prototype.queueGatherers = function(sources, role, status) {
     for (var i in sources) {
         let creepCount = _.filter(Game.creeps, (creep) =>
             creep.memory.role == role && creep.memory.targetID == sources[i].id).length;
+            
+        let queueCount = _.filter(this.memory.buildQueue, (creep) =>
+            creep.role == role && creep.targetID == sources[i].id).length;
 
-        if (creepCount == 0) {
+        if (creepCount + queueCount == 0) {
             let storedBlueprint = _.find(this.memory.storedBlueprints, (blueprint) =>
                 blueprint.role == role && blueprint.targetID == sources[i].id);
             
@@ -57,6 +84,8 @@ StructureSpawn.prototype.queueGatherers = function(sources, role, status) {
                 let parts = this.setParts(role);
 
                 let blueprint = new CreepBlueprint(role, 'basic', status, parts, sources[i].id);
+
+                console.log(blueprint.calculateEnergyRequired());
 
                 if (this.memory.storedBlueprints == null) {
                     this.memory.storedBlueprints = [];
@@ -67,6 +96,8 @@ StructureSpawn.prototype.queueGatherers = function(sources, role, status) {
                 this.memory.buildQueue.push(blueprint);
             }
             else {
+                this.updateBlueprint(storedBlueprint);
+
                 this.memory.buildQueue.push(storedBlueprint);
             }
         }
@@ -76,8 +107,11 @@ StructureSpawn.prototype.queueGatherers = function(sources, role, status) {
 StructureSpawn.prototype.queueWorkers = function(role) {
     let creepCount = _.filter(Game.creeps, (creep) =>
         creep.memory.role == role).length;
+        
+    let queueCount = _.filter(this.memory.buildQueue, (creep) =>
+            creep.role == role).length;
 
-    if (creepCount < 2) {
+    if (creepCount + queueCount < 2) {
         let storedBlueprint = _.find(this.memory.storedBlueprints, (blueprint) =>
             blueprint.role == role);
         
@@ -85,6 +119,8 @@ StructureSpawn.prototype.queueWorkers = function(role) {
             let parts = this.setParts(role);
 
             let blueprint = new CreepBlueprint(role, 'basic', 'stocking', parts);
+
+            console.log(blueprint.calculateEnergyRequired());
 
             if (this.memory.storedBlueprints == null) {
                 this.memory.storedBlueprints = [];
@@ -102,7 +138,7 @@ StructureSpawn.prototype.queueWorkers = function(role) {
 
 StructureSpawn.prototype.buildCreeps = function() {
     
-    let blueprint = this.memory.buildQueue.shift();
+    let blueprint = this.memory.buildQueue[0];
 
     let newName = blueprint.role + Game.time;
 
@@ -120,6 +156,8 @@ StructureSpawn.prototype.buildCreeps = function() {
         creep.memory.targetID = blueprint.targetID;
 
         creep.memory.container = blueprint.container;
+
+        this.memory.buildQueue.shift();
     }
 };
 
@@ -141,6 +179,10 @@ StructureSpawn.prototype.setParts = function(role) {
     
             if (energyCapacityAvailable >= 800 && energyCapacityAvailable <= 1250) {
                 return this.setCreepParts(0,10,0,0,0,0,0,5);
+            }
+
+            if (energyCapacityAvailable >= 1300 && energyCapacityAvailable <= 9999) {
+                return this.setCreepParts(0,16,0,0,0,0,0,8);
             }
 
             break;
@@ -167,6 +209,10 @@ StructureSpawn.prototype.setParts = function(role) {
             if (energyCapacityAvailable >= 800 && energyCapacityAvailable <= 1250) {
                 return this.setCreepParts(3,5,0,0,0,0,0,4);
             }
+
+            if (energyCapacityAvailable >= 1300 && energyCapacityAvailable <= 9999) {
+                return this.setCreepParts(6,7,0,0,0,0,0,7);
+            }
         
             // if (extensionCount >= 20 && extensionCount <= 29) {
             //     return this.setCreepParts(6,7,0,0,0,0,0,7);
@@ -189,6 +235,10 @@ StructureSpawn.prototype.setParts = function(role) {
         
             if (energyCapacityAvailable >= 800 && energyCapacityAvailable <= 1250) {
                 return this.setCreepParts(3,5,0,0,0,0,0,4);
+            }
+
+            if (energyCapacityAvailable >= 1300 && energyCapacityAvailable <= 9999) {
+                return this.setCreepParts(6,7,0,0,0,0,0,7);
             }
         
             // if (extensionCount >= 20 && extensionCount <= 29) {
@@ -334,6 +384,16 @@ StructureSpawn.prototype.setCreepParts = function(work,carry,ranged,attack,heal,
     }
 
     return parts;
+};
+
+StructureSpawn.prototype.updateBlueprint = function(blueprint) {
+    let energyCapacityAvailable = this.room.energyCapacityAvailable;
+
+    if (energyCapacityAvailable > blueprint.energyRequired) {
+        let newParts = this.setParts(blueprint.role);
+
+        blueprint.parts = newParts;
+    }
 };
 
 // StructureSpawn.prototype.countExtensions = function() {
