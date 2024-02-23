@@ -94,7 +94,9 @@ Creep.prototype.runCollector = function() {
     }
 
     if (this.memory.status == 'depositing') {
-        let target;
+        // this.updateBlueprint();
+
+        // let target;
 
         if (this.memory.target == 'extensions') {
             this.DepositInExtensions();
@@ -133,8 +135,6 @@ Creep.prototype.CollectDroppedResources = function() {
         this.memory.status = 'depositing';
 
         this.memory.target = 'extensions';
-
-        this.checkForHalfLoads();
     }
 };
 
@@ -313,19 +313,6 @@ Creep.prototype.collectFromContainer = function() {
         this.memory.status = 'depositing';
 
         this.memory.target = 'extensions';
-
-        this.checkForHalfLoads();
-    }
-};
-
-Creep.prototype.checkForHalfLoads = function() {
-    if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-        if (this.memory.halfLoads == null) {
-            this.memory.halfLoads = 1;
-        }
-        else {
-            this.memory.halfLoads = this.memory.halfLoads + 1;
-        }
     }
 };
 
@@ -387,6 +374,49 @@ Creep.prototype.runBuilder = function() {
 
             if (result == OK || result == ERR_INVALID_TARGET) {
                 this.memory.targetID = null;
+            }
+        }
+    }
+};
+
+Creep.prototype.updateBlueprint = function () {
+    if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+        let spawn = Game.spawns[this.memory.spawn];
+
+        let carryCount = 0;
+
+        let moveCount = 0;
+
+        for (var i in this.body) {
+            if (this.body[i] == CARRY) {
+                carryCount++;
+            }
+
+            if (this.body[i] == MOVE) {
+                moveCount++;
+            }
+        }
+
+        let parts = spawn.setCreepParts(0, carryCount - 1, 0, 0, 0, 0, 0, moveCount - 1);
+
+        let storedBlueprint = _.find(spawn.memory.storedBlueprints, (blueprint) => blueprint.role == this.memory.role && blueprint.targetID == this.memory.targetID);
+
+        if (storedBlueprint == null) {
+            let blueprint = new spawn.CreepBlueprint(this.memory.role, 'basic', 'moving', parts, spawn.name, this.memory.targetID, this.memory.container);
+
+            blueprint.isChecked = true;
+
+            if (spawn.memory.storedBlueprints == null) {
+                this.memory.storedBlueprints = [];
+            }
+
+            spawn.memory.storedBlueprints.push(blueprint);
+        }
+        else {
+            if (storedBlueprint.isChecked == false) {
+                storedBlueprint.parts = parts;
+
+                storedBlueprint.isChecked = true;
             }
         }
     }

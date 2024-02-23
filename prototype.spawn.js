@@ -1,4 +1,4 @@
-function CreepBlueprint(role, group, status, parts, targetID = null, container = null) {
+function CreepBlueprint(role, group, status, parts, spawn, targetID = null, container = null) {
     this.role = role;
 
     this.group = group;
@@ -9,31 +9,35 @@ function CreepBlueprint(role, group, status, parts, targetID = null, container =
 
     this.parts = parts;
 
-    this.energyRequired = null;
+    // this.energyRequired = null;
 
     this.container = container;
 
-    this.calculateEnergyRequired = function() {
-        let energyCount = 0;
+    this.isChecked = false;
 
-        for(var i in this.parts) {
-            if (parts[i] == WORK) {
-                energyCount = energyCount + 100;
-            }
+    this.spawn = spawn;
 
-            if (parts[i] == CARRY) {
-                energyCount = energyCount + 50;
-            }
+    // this.calculateEnergyRequired = function() {
+    //     let energyCount = 0;
 
-            if (parts[i] == MOVE) {
-                energyCount = energyCount + 50;
-            }
-        }
+    //     for(var i in this.parts) {
+    //         if (parts[i] == WORK) {
+    //             energyCount = energyCount + 100;
+    //         }
 
-        this.energyRequired = energyCount;
+    //         if (parts[i] == CARRY) {
+    //             energyCount = energyCount + 50;
+    //         }
 
-        return energyCount;
-    }
+    //         if (parts[i] == MOVE) {
+    //             energyCount = energyCount + 50;
+    //         }
+    //     }
+
+    //     this.energyRequired = energyCount;
+
+    //     return energyCount;
+    // }
 }
 
 StructureSpawn.prototype.runSpawner = function() {
@@ -83,15 +87,11 @@ StructureSpawn.prototype.queueGatherers = function(sources, role, status) {
             if (storedBlueprint == null) {
                 let parts = this.setParts(role);
 
-                let blueprint = new CreepBlueprint(role, 'basic', status, parts, sources[i].id);
-
-                console.log(blueprint.calculateEnergyRequired());
+                let blueprint = new CreepBlueprint(role, 'basic', status, parts, this.name, sources[i].id);
 
                 if (this.memory.storedBlueprints == null) {
                     this.memory.storedBlueprints = [];
                 }
-
-                this.memory.storedBlueprints.push(blueprint);
 
                 this.memory.buildQueue.push(blueprint);
             }
@@ -118,15 +118,11 @@ StructureSpawn.prototype.queueWorkers = function(role) {
         if (storedBlueprint == null) {
             let parts = this.setParts(role);
 
-            let blueprint = new CreepBlueprint(role, 'basic', 'stocking', parts);
-
-            console.log(blueprint.calculateEnergyRequired());
+            let blueprint = new CreepBlueprint(role, 'basic', status, parts, this.name, sources[i].id);
 
             if (this.memory.storedBlueprints == null) {
                 this.memory.storedBlueprints = [];
             }
-
-            this.memory.storedBlueprints.push(blueprint);
 
             this.memory.buildQueue.push(blueprint);
         }
