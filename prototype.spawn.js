@@ -118,7 +118,7 @@ StructureSpawn.prototype.queueWorkers = function(role) {
         if (storedBlueprint == null) {
             let parts = this.setParts(role);
 
-            let blueprint = new CreepBlueprint(role, 'basic', status, parts, this.name, sources[i].id);
+            let blueprint = new CreepBlueprint(role, 'basic', 'stocking', parts);
 
             if (this.memory.storedBlueprints == null) {
                 this.memory.storedBlueprints = [];
