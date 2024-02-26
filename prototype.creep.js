@@ -1,3 +1,5 @@
+const sign = 'This room is under the control of The Hidden Guild. https://discord.gg/WRDG6Sy';
+
 Creep.prototype.runCreep = function() {
     switch (this.memory.role) {
         case "harvester":
@@ -33,6 +35,11 @@ Creep.prototype.runCreep = function() {
 
         case "support":
             this.runSupport();
+
+            break;
+
+        case "expander":
+            this.runExpander();
 
             break;
     }
@@ -481,6 +488,21 @@ Creep.prototype.runSupport = function() {
             if (this.memory.target == 'storage') {
                 this.DepositInStorage();
             }
+        }
+    }
+};
+
+Creep.prototype.runExpander = function() {
+    if (this.memory.status == 'scouting') {
+        if (this.room.controller.sign.text != sign) {
+            let result = this.signController(this.room.controller, sign);
+
+            if (result == ERR_NOT_IN_RANGE) {
+                this.moveTo(this.room.controller);
+            }
+        }
+        else { // Find a new room.
+            let exits = Game.map.describeExits(this.room.name);
         }
     }
 };

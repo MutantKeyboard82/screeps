@@ -59,7 +59,7 @@ StructureSpawn.prototype.setBuildQueue = function() {
 
     let sources = this.room.find(FIND_SOURCES);
 
-    let energryCapacityAvailable = this.room.energryCapacityAvailable;
+    let energyCapacityAvailable = this.room.energyCapacityAvailable;
 
     this.queueGatherers(sources, 'harvester', 'harvesting');
 
@@ -71,7 +71,7 @@ StructureSpawn.prototype.setBuildQueue = function() {
         this.queueWorkers('builder');
     }
 
-    if (energryCapacityAvailable >= 650) {
+    if (energyCapacityAvailable >= 650) {
         this.queueExpander('expander');
     }
 
@@ -166,6 +166,22 @@ StructureSpawn.prototype.queueSupporters = function(role) {
 
         this.memory.buildQueue.unshift(blueprint);
     }
+};
+
+StructureSpawn.prototype.queueExpander = function(role) {
+    let creepCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == role).length;
+
+    let queueCount = _.filter(this.memory.buildQueue, (creep) =>
+        creep.role == role).length; 
+
+        if (creepCount + queueCount < 1) {
+            let parts = this.setParts(role);
+    
+            let blueprint = new CreepBlueprint(role, 'basic', 'scouting', parts, this.name);
+    
+            this.memory.buildQueue.push(blueprint);
+        }
 };
 
 StructureSpawn.prototype.buildCreeps = function() {
@@ -343,6 +359,9 @@ StructureSpawn.prototype.setParts = function(role) {
             }
 
             break;
+
+        case "expander":
+            return this.setCreepParts(0,0,0,0,0,1,0,1);
     }
 };
 
