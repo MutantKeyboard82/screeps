@@ -59,6 +59,8 @@ StructureSpawn.prototype.setBuildQueue = function() {
 
     let sources = this.room.find(FIND_SOURCES);
 
+    let energryCapacityAvailable = this.room.energryCapacityAvailable;
+
     this.queueGatherers(sources, 'harvester', 'harvesting');
 
     this.queueWorkers('upgrader');
@@ -67,6 +69,10 @@ StructureSpawn.prototype.setBuildQueue = function() {
 
     if (constructionSites.length > 0) {
         this.queueWorkers('builder');
+    }
+
+    if (energryCapacityAvailable >= 650) {
+        this.queueExpander('expander');
     }
 
     this.queueGatherers(sources, 'collector', 'moving');
