@@ -59,8 +59,6 @@ StructureSpawn.prototype.setBuildQueue = function() {
 
     let sources = this.room.find(FIND_SOURCES);
 
-    this.queueGatherers(sources, 'collector', 'moving');
-
     this.queueGatherers(sources, 'harvester', 'harvesting');
 
     this.queueWorkers('upgrader');
@@ -69,6 +67,12 @@ StructureSpawn.prototype.setBuildQueue = function() {
 
     if (constructionSites.length > 0) {
         this.queueWorkers('builder');
+    }
+
+    this.queueGatherers(sources, 'collector', 'moving');
+
+    if (this.room.storage != null) {
+        this.queueSupporters('support');
     }
 };
 
@@ -93,12 +97,22 @@ StructureSpawn.prototype.queueGatherers = function(sources, role, status) {
                     this.memory.storedBlueprints = [];
                 }
 
-                this.memory.buildQueue.push(blueprint);
+                if (blueprint.role == 'harvester') {
+                    this.memory.buildQueue.push(blueprint);
+                }
+                else {
+                    this.memory.buildQueue.unshift(blueprint);
+                }
             }
             else {
                 this.updateBlueprint(storedBlueprint);
 
-                this.memory.buildQueue.push(storedBlueprint);
+                if (blueprint.role == 'harvester') {
+                    this.memory.buildQueue.push(blueprint);
+                }
+                else {
+                    this.memory.buildQueue.unshift(blueprint);
+                }
             }
         }
     }
@@ -111,14 +125,14 @@ StructureSpawn.prototype.queueWorkers = function(role) {
     let queueCount = _.filter(this.memory.buildQueue, (creep) =>
             creep.role == role).length;
 
-    if (creepCount + queueCount < 2) {
+    if (creepCount + queueCount < 1) {
         let storedBlueprint = _.find(this.memory.storedBlueprints, (blueprint) =>
             blueprint.role == role);
         
         if (storedBlueprint == null) {
             let parts = this.setParts(role);
 
-            let blueprint = new CreepBlueprint(role, 'basic', 'stocking', parts);
+            let blueprint = new CreepBlueprint(role, 'basic', 'stocking', parts, this.name,);
 
             if (this.memory.storedBlueprints == null) {
                 this.memory.storedBlueprints = [];
@@ -129,6 +143,22 @@ StructureSpawn.prototype.queueWorkers = function(role) {
         else {
             this.memory.buildQueue.push(storedBlueprint);
         }
+    }
+};
+
+StructureSpawn.prototype.queueSupporters = function(role) {
+    let creepCount = _.filter(Game.creeps, (creep) =>
+        creep.memory.role == role).length;
+
+    let queueCount = _.filter(this.memory.buildQueue, (creep) =>
+        creep.role == role).length;
+
+    if (creepCount + queueCount < 1) {
+        let parts = this.setParts(role);
+
+        let blueprint = new CreepBlueprint(role, 'basic', 'stocking', parts, this.name);
+
+        this.memory.buildQueue.unshift(blueprint);
     }
 };
 
@@ -159,6 +189,8 @@ StructureSpawn.prototype.buildCreeps = function() {
 
 StructureSpawn.prototype.setParts = function(role) {
     let energyCapacityAvailable = this.room.energyCapacityAvailable;
+
+    let energyAvailable = this.room.energyAvailable;
 
     switch (role) {
         case "collector":
@@ -206,8 +238,16 @@ StructureSpawn.prototype.setParts = function(role) {
                 return this.setCreepParts(3,5,0,0,0,0,0,4);
             }
 
-            if (energyCapacityAvailable >= 1300 && energyCapacityAvailable <= 9999) {
+            if (energyCapacityAvailable >= 1300 && energyCapacityAvailable <= 1750) {
                 return this.setCreepParts(6,7,0,0,0,0,0,7);
+            }
+
+            if (energyCapacityAvailable >= 1800 && energyCapacityAvailable < 2250) {
+                return this.setCreepParts(9,9,0,0,0,0,0,9);
+            }
+
+            if (energyCapacityAvailable >= 2300 && energyCapacityAvailable <= 9999) {
+                return this.setCreepParts(11,12,0,0,0,0,0,12);
             }
         
             // if (extensionCount >= 20 && extensionCount <= 29) {
@@ -233,8 +273,16 @@ StructureSpawn.prototype.setParts = function(role) {
                 return this.setCreepParts(3,5,0,0,0,0,0,4);
             }
 
-            if (energyCapacityAvailable >= 1300 && energyCapacityAvailable <= 9999) {
+            if (energyCapacityAvailable >= 1300 && energyCapacityAvailable <= 1750) {
                 return this.setCreepParts(6,7,0,0,0,0,0,7);
+            }
+
+            if (energyCapacityAvailable >= 1800 && energyCapacityAvailable < 2250) {
+                return this.setCreepParts(9,9,0,0,0,0,0,9);
+            }
+
+            if (energyCapacityAvailable >= 2300 && energyCapacityAvailable <= 9999) {
+                return this.setCreepParts(11,12,0,0,0,0,0,12);
             }
         
             // if (extensionCount >= 20 && extensionCount <= 29) {
@@ -246,6 +294,49 @@ StructureSpawn.prototype.setParts = function(role) {
             // }
         
         break;
+
+        case "support":
+            if (energyAvailable <= 300 && energyAvailable < 450) {
+                return this.setCreepParts(0,4,0,0,0,0,0,2);
+            }
+        
+            if (energyAvailable >= 450 && energyAvailable < 600) {
+                return this.setCreepParts(0,6,0,0,0,0,0,3);
+            }
+        
+            if (energyAvailable >= 600 && energyAvailable < 750) {
+                return this.setCreepParts(0,8,0,0,0,0,0,4);
+            }
+
+            if (energyAvailable >= 750 && energyAvailable < 900) {
+                return this.setCreepParts(0,10,0,0,0,0,0,5);
+            }
+
+            if (energyAvailable >= 900 && energyAvailable < 1050) {
+                return this.setCreepParts(0,12,0,0,0,0,0,6);
+            }
+
+            if (energyAvailable >= 1050 && energyAvailable < 1200) {
+                return this.setCreepParts(0,14,0,0,0,0,0,7);
+            }
+
+            if (energyAvailable >= 1200 && energyAvailable < 1350) {
+                return this.setCreepParts(0,16,0,0,0,0,0,8);
+            }
+
+            if (energyAvailable >= 1350 && energyAvailable < 1750) {
+                return this.setCreepParts(0,18,0,0,0,0,0,9);
+            }
+
+            if (energyAvailable >= 1800 && energyAvailable < 2250) {
+                return this.setCreepParts(0,24,0,0,0,0,0,12);
+            }
+
+            if (energyAvailable >= 2300) {
+                return this.setCreepParts(0,30,0,0,0,0,0,15);
+            }
+
+            break;
     }
 };
 

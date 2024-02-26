@@ -30,6 +30,11 @@ Creep.prototype.runCreep = function() {
             this.runBuilder();
         
         break;
+
+        case "support":
+            this.runSupport();
+
+            break;
     }
 };
 
@@ -181,11 +186,25 @@ Creep.prototype.DepositInSpawn = function() {
                 this.moveTo(spawn);
             }
 
-            if (this.transfer(spawn, RESOURCE_ENERGY) == ERR_FULL) {
-                this.memory.target = 'towers';
+            let result = this.transfer(spawn, RESOURCE_ENERGY);
+
+            if (result == ERR_FULL) {
+                if (this.memory.role == 'support') {
+                    this.memory.target = 'storage';
+                }
+                else {
+                    this.memory.target = 'towers';
+                }
+            }
+
+            if (result == OK && this.memory.role == 'support') {
+                this.memory.target = 'storage';
             }
         }
         else {
+            if (this.memory.role == 'support') {
+                this.memory.target = 'storage';
+            }
             this.memory.target = 'towers';
         }
     }
@@ -296,7 +315,14 @@ Creep.prototype.collectFromStorage = function() {
     }
 
     if (result == OK) {
-        this.memory.status = 'upgrading';
+        if (this.memory.role != 'support') {
+            this.memory.status = 'upgrading';
+        }
+        else {
+            this.memory.status = 'depositing';
+
+            this.memory.target = 'extensions';
+        }
     }
 };
 
@@ -417,6 +443,43 @@ Creep.prototype.updateBlueprint = function () {
                 storedBlueprint.parts = parts;
 
                 storedBlueprint.isChecked = true;
+            }
+        }
+    }
+};
+
+Creep.prototype.runSupport = function() {
+    //HACK 
+    if (this.memory.target == 'towers') {
+        this.memory.target = 'storage';
+    }
+    
+    if (this.room.energyAvailable != this.room.energryCapacityAvailable) {
+        if (this.memory.status == 'moving') {
+            this.memory.status = 'stocking'; 
+        }
+
+        if (this.memory.status == 'stocking') {
+            if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                    this.collectFromStorage();
+                }
+            else {
+                this.memory.status = 'depositing';
+
+                this.memory.target = 'extensions';
+            }
+        }
+        else {
+            if (this.memory.target == 'extensions') {
+                this.DepositInExtensions();
+            }
+
+            if (this.memory.target == 'spawn') {
+                this.DepositInSpawn();
+            }
+
+            if (this.memory.target == 'storage') {
+                this.DepositInStorage();
             }
         }
     }
