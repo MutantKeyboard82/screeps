@@ -502,7 +502,40 @@ Creep.prototype.runExpander = function() {
             }
         }
         else { // Find a new room.
-            let exits = Game.map.describeExits(this.room.name);
+            console.log('TargetRoom: ' + this.memory.targetRoom);
+
+            if (this.memory.targetRoom != null) {
+                console.log('Here');
+
+                if (this.room.name != this.memory.targetRoom) {
+                    let route = Game.map.findRoute(this.room, this.memory.targetRoom);
+
+                    for (var i in route) {
+                        if (route.length > 0) {
+                            console.log('Route step ' + i + ': ' + route[i]);
+
+                            let exit = this.pos.findClosestByPath(route[0].exit);
+
+                            this.moveTo(exit);
+                        }
+                    }
+                }
+            }
+            else {
+                console.log('Here');
+
+                let exits = Game.map.describeExits(this.room.name);
+
+                for (var i in exits) {
+                    let room = Game.rooms[exits[i].roomName];
+
+                    console.log('Room: ' + room);
+
+                    if (room == null) {
+                        // this.memory.targetRoom = room.name;
+                    }
+                }
+            }
         }
     }
 };
