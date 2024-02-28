@@ -1,5 +1,5 @@
 StructureTower.prototype.defendRoom = function() {
-const hitThreshold = 85000;
+const hitThreshold = 500000;
 
     let hostiles = this.room.find(FIND_HOSTILE_CREEPS);
 

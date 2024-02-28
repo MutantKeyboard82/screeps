@@ -57,7 +57,13 @@ StructureSpawn.prototype.setBuildQueue = function() {
         this.memory.buildQueue = [];
     }
 
-    let sources = this.room.find(FIND_SOURCES);
+    let rooms = Game.rooms;
+
+    let sources = []; // = this.room.find(FIND_SOURCES);
+
+    for (var i in rooms) {
+        sources.push(rooms[i].find(FIND_SOURCES));
+    }
 
     let energyCapacityAvailable = this.room.energyCapacityAvailable;
 

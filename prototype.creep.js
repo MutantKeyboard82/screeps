@@ -494,47 +494,66 @@ Creep.prototype.runSupport = function() {
 
 Creep.prototype.runExpander = function() {
     if (this.memory.status == 'scouting') {
-        if (this.room.controller.sign.text != sign) {
-            let result = this.signController(this.room.controller, sign);
+        if (this.memory.targetRoom != null) {
+            if (this.room.name != this.memory.targetRoom) {
+                console.log('Not in room');
 
-            if (result == ERR_NOT_IN_RANGE) {
-                this.moveTo(this.room.controller);
-            }
-        }
-        else { // Find a new room.
-            console.log('TargetRoom: ' + this.memory.targetRoom);
+                let route = Game.map.findRoute(this.room, this.memory.targetRoom);
 
-            if (this.memory.targetRoom != null) {
-                console.log('Here');
+                for (var i in route) {
+                    if (route.length > 0) {
+                        console.log('Route step ' + i + ': ' + route[i]);
 
-                if (this.room.name != this.memory.targetRoom) {
-                    let route = Game.map.findRoute(this.room, this.memory.targetRoom);
+                        let exit = this.pos.findClosestByPath(route[0].exit);
 
-                    for (var i in route) {
-                        if (route.length > 0) {
-                            console.log('Route step ' + i + ': ' + route[i]);
-
-                            let exit = this.pos.findClosestByPath(route[0].exit);
-
-                            this.moveTo(exit);
-                        }
+                        this.moveTo(exit);
                     }
                 }
             }
             else {
-                console.log('Here');
+                console.log('In room');
 
-                let exits = Game.map.describeExits(this.room.name);
+                console.log('Room: ' + this.room.name);
 
-                for (var i in exits) {
-                    let room = Game.rooms[exits[i].roomName];
+                console.log('Controller: ' + this.room.controller);
+
+                this.moveTo(this.room.controller);
+
+                console.log(Object.values(this.room.controller));
+
+                if (this.room.controller.owner == null) {
+                    let result = this.claimController(this.room.controller);
+        
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.moveTo(this.room.controller);
+                    }
+                }
+                else { // Find a new room.        
+                    let exits = Game.map.describeExits(this.room.name);
+
+                    let exitDirs = Object.values(exits);
+
+                    let room = exitDirs[0];
 
                     console.log('Room: ' + room);
 
-                    if (room == null) {
-                        // this.memory.targetRoom = room.name;
+                    if (room != null) {
+                        this.memory.targetRoom = room;
                     }
                 }
+            }
+        }
+        else {
+            let exits = Game.map.describeExits(this.room.name);
+
+            let exitDirs = Object.values(exits);
+
+            let room = exitDirs[0];
+
+            console.log('Room: ' + room);
+
+            if (room != null) {
+                this.memory.targetRoom = room;
             }
         }
     }
